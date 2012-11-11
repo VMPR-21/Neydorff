@@ -26,6 +26,8 @@ public:
     virtual bool saveModel(const QString &fileName) = 0;
     //virtual bool setDataSourceType(enum DataSourceType dataSourceType)=0;
 
+    virtual bool NewExperimenLoadfromCSV(const QString &fileName) = 0;
+
     //расчитать "У" с указаным порогового значения для отбрасывания выбросов
     virtual void calcY(double threshold) = 0;
 

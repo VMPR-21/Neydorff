@@ -888,6 +888,13 @@ bool MainWindow::loadFromCSV()
    return control->loadModel(fileName);
 }
 
+bool MainWindow::NewExperimenLoadfromCSV()
+{
+    _dataChanged = false;
+    QString fileName = QFileDialog::getOpenFileName(this, ("Импорт из CSV"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+   return control->NewExperimenLoadfromCSV(fileName);
+}
+
 void MainWindow::chModelParams()   //parametri
 {
     if(_dataChanged)

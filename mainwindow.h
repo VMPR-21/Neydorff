@@ -84,6 +84,7 @@ private slots:
     bool loadToFile(); //load
     void saveToCSV();//save to csv
     bool loadFromCSV(); //load from csv
+    bool NewExperimenLoadfromCSV(); //
     void chModelParams(); //parametri
     void chNumberFormater();//format chisla
     void nModel(); //new experement
