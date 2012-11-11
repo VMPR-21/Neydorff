@@ -25,10 +25,7 @@ class findExtrDialog : public QDialog
 
     void updateResult();
 
-    bool isMax;
-    double h;
-    int ch;
-    double dev;
+
 
     bool initial;
 
@@ -59,6 +56,11 @@ public:
 
     int index1; //точка в которой провести эксперимент
     int index2; //точка в которой провести эксперимент
+
+    bool isMax;
+    double h;
+    int ch;
+    double dev;
 
     bool isFormulaExperiment;
 
