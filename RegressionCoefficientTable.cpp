@@ -334,9 +334,6 @@ void RegressionCoefficientTable::saveToCSV(QTextStream &dstStream)
 {
     dstStream << QString::fromUtf8("ТАБЛИЦА КОЭФФИЦИЕНТОВ РЕГРЕССИИ") << "\r\n";
     dstStream << QString::fromUtf8("Доверительное значение:") << ";" << ExperimentTable::doubleWithComma(_trustedValue) << "\r\n";
-    dstStream << QString::fromUtf8("Число факторов:") << ";" << _factorCount << "\r\n";
-    dstStream << QString::fromUtf8("Уровень взаимодействия:") << ";" << _interactionLevel << "\r\n";
-
     dstStream << QString::fromUtf8("Количество коэффициентов:") << ";";
     if(_coefficients)
         dstStream << (quint64)_coefficients->size();
@@ -346,25 +343,18 @@ void RegressionCoefficientTable::saveToCSV(QTextStream &dstStream)
         return;
     }
     dstStream << "\r\n";
-    dstStream << QString::fromUtf8("Размер строки:") << ";" << (quint64)_coefficients->at(0).index().size() << "\r\n";
-    dstStream << QString::fromUtf8("Коэффициенты:") << "\r\n";
+    dstStream << QString::fromUtf8("КОЭФФИЦИЕНТЫ:") << ";" << QString::fromUtf8("B коэф.:") << ";" << QString::fromUtf8("Натуральное:") << "\r\n";
     for(size_t i = 0; i < _coefficients->size(); i++)
     {
         QString tmp = "";
         std::vector<int> index = _coefficients->at(i).index();
-        dstStream << QString::fromUtf8("Индекс коэффициента:") << ";";
         for(size_t j = 0; j < index.size(); j++)
         {
-            dstStream  << index.at(j) << ";"; // что это???
             tmp += QString::number(index.at(j));
         }
-
-        dstStream << "\r\n";
-
         double normVal = _coefficients->at(i).norm_value(), natVal = _coefficients->at(i).natural_value();
         bool isSignificant = _coefficients->at(i).is_significant();
-        dstStream << QString::fromUtf8("B") << tmp << QString::fromUtf8(" коэф.:") << ";" << ExperimentTable::doubleWithComma(normVal) << "\r\n";
-        dstStream << QString::fromUtf8("В") << tmp << QString::fromUtf8(" Натуральное:") << ";" << ExperimentTable::doubleWithComma(natVal) << "\r\n";
-        dstStream << QString::fromUtf8("Значимость:") << ";" << isSignificant << "\r\n";
+        dstStream << QString::fromUtf8("B") << tmp << ";" << ExperimentTable::doubleWithComma(normVal);
+        dstStream << ";" << ExperimentTable::doubleWithComma(natVal) << "\r\n";
     }
 }
