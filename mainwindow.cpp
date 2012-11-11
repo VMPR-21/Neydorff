@@ -885,7 +885,7 @@ bool MainWindow::loadFromCSV()
 {
     _dataChanged = false;
     QString fileName = QFileDialog::getOpenFileName(this, ("Открыть"), "", ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
-   return control->loadModel(fileName);
+   return control->NewExperimenLoadfromCSV(fileName);
 }
 
 bool MainWindow::NewExperimenLoadfromCSV()
