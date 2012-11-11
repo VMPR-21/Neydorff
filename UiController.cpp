@@ -156,120 +156,124 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
     }
     quint64 size;
     vector<vector<YInfo> > m_values;
-    srcStream.readLine();
     tmp = srcStream.readLine();
     if ("" != tmp) {
         tmp = tmp.split(QRegExp(";"))[1];
         _paral = tmp.toULongLong();
-    }
-    ResponcesSourseFunction *src = new ResponcesSourseFunction();
-    src->ActualFactNum = generalFactorCount;
-    src->FactNum = factorCount;
-    src->MinFactNum = -1;
-    src->parall = _paral;
-    src->PFEnum = pow(2., src->FactNum);
-    src->Descriptions = descriptions;
-    src->FactDivergences = *delta;
-    src->FactValues = *center;
-    if ("" == function)
-    {
-        src->SetEvaluateFunction("","");
-    }
-    else
-    {
-        QString tmpstr=function;
-        if ("degrees" == measure)
+
+        srcStream.readLine();
+        ResponcesSourseFunction *src = new ResponcesSourseFunction();
+        src->ActualFactNum = generalFactorCount;
+        src->FactNum = factorCount;
+        src->MinFactNum = -1;
+        src->parall = _paral;
+        src->PFEnum = pow(2., src->FactNum);
+        src->Descriptions = descriptions;
+        src->FactDivergences = *delta;
+        src->FactValues = *center;
+        if ("" == function)
         {
-            tmpstr=src->CheckFormulaForTrinometricFunctions(tmpstr);
+            src->SetEvaluateFunction("","");
         }
-        src->SetEvaluateFunction(function,tmpstr);
-    }
-    src->DrobRepl=2./3;
-    _dataSrc = src;
-
-    _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, factorCount, replicaDelimiter, _interactionLevel, evaluateFunction.at(0), evaluateFunction.at(1));
-
-
-    _experimentTable->x().setFactorsDescriptions(descriptions);
-
-    assert(_dataSrc->inputsCount() == _experimentTable->x().count());
-    assert(_dataSrc->actualInputsCount() == _experimentTable->x().generalFactorCount());
-    assert(_experimentTable->rowCount() >= pow(2., _dataSrc->actualInputsCount()));
-
-    _experimentTable->x().setFactorsDescriptions(_dataSrc->getDescriptions());
-
-    for(int i = 0; i < _dataSrc->inputsCount(); i++)
-    {
-        _experimentTable->x().setXcenter(i, _dataSrc->centerFor(i));
-        double min, max;
-        _dataSrc->intervalFor(i, &min, &max);
-        _experimentTable->x().setXdelta(i, max / 2.);
-    }
-    if ("" == evaluateFunction.at(0)) {
-    m_values.resize(replica_row_count);
-        for(size_t i = 0; i < replica_row_count; i++)
+        else
         {
-            tmpList = srcStream.readLine().split(QRegExp(";"));
-            if (_paral + 1 == tmpList.length()) {
-                for(size_t j = 0; j < _paral; j++)
-                {
-                    double value;
-                    bool IsTrusted;
-                    tmp = ExperimentTable::doubleWithDot(tmpList[1 + j]);
-                    value = tmp.toDouble();
-                    YInfo yi;
-                    yi.Value = value;
-                    yi.IsTrusted = true;
-                    m_values[i].push_back(yi);
-                }
-                _experimentTable->y().set_at(i, m_values[i]); //add it to table
-            }
-            else
+            QString tmpstr=function;
+            if ("degrees" == measure)
             {
-                for(size_t j = 0; j < _paral; j++)
-                {
-                    double value;
-                    bool IsTrusted;
-                    if (tmpList.length() > j+1) {
+                tmpstr=src->CheckFormulaForTrinometricFunctions(tmpstr);
+            }
+            src->SetEvaluateFunction(function,tmpstr);
+        }
+        src->DrobRepl=2./3;
+        _dataSrc = src;
+
+        _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, factorCount, replicaDelimiter, _interactionLevel, evaluateFunction.at(0), evaluateFunction.at(1));
+
+
+        _experimentTable->x().setFactorsDescriptions(descriptions);
+
+        assert(_dataSrc->inputsCount() == _experimentTable->x().count());
+        assert(_dataSrc->actualInputsCount() == _experimentTable->x().generalFactorCount());
+        assert(_experimentTable->rowCount() >= pow(2., _dataSrc->actualInputsCount()));
+
+        _experimentTable->x().setFactorsDescriptions(_dataSrc->getDescriptions());
+
+        for(int i = 0; i < _dataSrc->inputsCount(); i++)
+        {
+            _experimentTable->x().setXcenter(i, _dataSrc->centerFor(i));
+            double min, max;
+            _dataSrc->intervalFor(i, &min, &max);
+            _experimentTable->x().setXdelta(i, max / 2.);
+        }
+        if ("" == evaluateFunction.at(0)) {
+        m_values.resize(replica_row_count);
+            for(size_t i = 0; i < replica_row_count; i++)
+            {
+                tmpList = srcStream.readLine().split(QRegExp(";"));
+                if (_paral + 1 == tmpList.length()) {
+                    for(size_t j = 0; j < _paral; j++)
+                    {
+                        double value;
+                        bool IsTrusted;
                         tmp = ExperimentTable::doubleWithDot(tmpList[1 + j]);
                         value = tmp.toDouble();
-                    } else {
-                        value = 0;
+                        YInfo yi;
+                        yi.Value = value;
+                        yi.IsTrusted = true;
+                        m_values[i].push_back(yi);
                     }
-                    YInfo yi;
-                    yi.Value = value;
-                    yi.IsTrusted = true;
-                    m_values[i].push_back(yi);
+                    _experimentTable->y().set_at(i, m_values[i]); //add it to table
                 }
-                _experimentTable->y().set_at(i, m_values[i]); //add it to table
+                else
+                {
+                    for(size_t j = 0; j < _paral; j++)
+                    {
+                        double value;
+                        bool IsTrusted;
+                        if (tmpList.length() > j+1) {
+                            tmp = ExperimentTable::doubleWithDot(tmpList[1 + j]);
+                            value = tmp.toDouble();
+                        } else {
+                            value = 0;
+                        }
+                        YInfo yi;
+                        yi.Value = value;
+                        yi.IsTrusted = true;
+                        m_values[i].push_back(yi);
+                    }
+                    _experimentTable->y().set_at(i, m_values[i]); //add it to table
+                }
             }
-        }
-    } else {
-        for(int i = 0; i < _experimentTable->rowCount(); i++)
-        {
-            std::vector<int> coords;
-
-            for(int j = 0; j < _experimentTable->x().count(); j++)
-                coords.push_back((int)_experimentTable->x().norm_at(j, i));
-
-            std::vector<double> yy = _dataSrc->getYdata(coords); //request y data for coords.
-            std::vector<YInfo> info;
-
-            for(size_t j = 0; j < yy.size(); j++)
+        } else {
+            for(int i = 0; i < _experimentTable->rowCount(); i++)
             {
-                YInfo inf;
-                inf.IsTrusted = true;
-                inf.Value = yy[j];
-                info.push_back(inf);
+                std::vector<int> coords;
+
+                for(int j = 0; j < _experimentTable->x().count(); j++)
+                    coords.push_back((int)_experimentTable->x().norm_at(j, i));
+
+                std::vector<double> yy = _dataSrc->getYdata(coords); //request y data for coords.
+                std::vector<YInfo> info;
+
+                for(size_t j = 0; j < yy.size(); j++)
+                {
+                    YInfo inf;
+                    inf.IsTrusted = true;
+                    inf.Value = yy[j];
+                    info.push_back(inf);
+                }
+
+                _experimentTable->y().set_at(i, info); //add it to table
             }
-
-            _experimentTable->y().set_at(i, info); //add it to table
         }
-    }
-    _view->updateInputs(*_experimentTable);
-    if (_isFormulaModel)
-        _view->updateYY(*_experimentTable);
+        _view->updateInputs(*_experimentTable);
+        if (_isFormulaModel) {
 
+            _view->updateYY(*_experimentTable);
+        }
+        this->calcY(0.2);
+        this->calcB(0.2);
+    }
     return true;
 }
 

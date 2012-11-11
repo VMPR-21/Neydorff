@@ -363,10 +363,16 @@ void ResponseTable::saveTo(DataStream &dstStream)
 
 void ResponseTable::saveToCSV(QTextStream &dstStream)
 {
-    dstStream << QString::fromUtf8("ТАБЛИЦА ОТКЛИКОВ\r\n");
     dstStream << QString::fromUtf8("Количество параллельных опытов:") << ";" << (quint64)m_values[0].size() << "\r\n";
+    dstStream << QString::fromUtf8("ТАБЛИЦА ОТКЛИКОВ:") << ";";
+    for(size_t i = 0; i < m_values[0].size(); i++)
+    {
+        dstStream << QString::fromUtf8("y") << i+1 << ";";
+    }
+    dstStream << "\r\n";
     for(size_t i = 0; i < m_values.size(); i++)
     {
+        dstStream <<  QString::fromUtf8("Опыт") << i << ":";
         for(size_t j = 0; j < m_values[i].size(); j++)
         {
             dstStream << ";" << ExperimentTable::doubleWithComma(m_values[i][j].Value);
