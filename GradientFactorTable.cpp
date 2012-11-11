@@ -349,15 +349,6 @@ void GradientFactorTable::saveTo(DataStream &dstStream)
 void GradientFactorTable::saveToCSV(QTextStream &dstStream)
 {
     FactorTable::saveToCSV(dstStream);
-    QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
-    if (codec!= NULL)
-    {
-        dstStream.setCodec(codec);
-    }
-    else
-    {
-        assert(1);
-    }
 
     dstStream << QString::fromUtf8("ТАБЛИЦА ФАКТОРОВ;\r\n");
     dstStream << QString::fromUtf8("Число факторов:") << ";" << (quint64)_x->at(0)->size() << "\r\n";
@@ -388,17 +379,6 @@ void GradientFactorTable::saveToCSV(QTextStream &dstStream)
         }
     }
     dstStream << QString::fromUtf8("Уровень взаимодействия:") << ";" << (quint64)_interactionLevel << ";\r\n";
-    dstStream << QString::fromUtf8("Количество генерирующих соотношений:") << ";" << (quint64)_generateRelations.size() << ";\r\n";
-    for(size_t i = 0; i < _generateRelations.size(); i++)
-    {
-        quint64 cols = _generateRelations.at(i).size();
-        dstStream << QString::fromUtf8("Размер генерирующих соотношений:") << ";" << cols << ";\r\n";
-
-        for(size_t j = 0; j < cols; j++)
-        {
-            dstStream << QString::fromUtf8("Генерирующее соотношение ХЗ") << i << j << ":;" << _generateRelations.at(i).at(j) << ";\r\n";
-        }
-    }
 }
 
 // поддерживает ли реплики

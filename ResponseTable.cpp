@@ -364,7 +364,6 @@ void ResponseTable::saveTo(DataStream &dstStream)
 void ResponseTable::saveToCSV(QTextStream &dstStream)
 {
     dstStream << QString::fromUtf8("ТАБЛИЦА ОТКЛИКОВ\r\n");
-    dstStream << QString::fromUtf8("Количество опытов ПФЭ:") << ";" << (quint64)m_values.size() << "\r\n";
     dstStream << QString::fromUtf8("Количество параллельных опытов:") << ";" << (quint64)m_values[0].size() << "\r\n";
     for(size_t i = 0; i < m_values.size(); i++)
     {

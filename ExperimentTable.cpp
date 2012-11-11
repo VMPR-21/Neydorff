@@ -10,6 +10,7 @@
 #include "CentralOrtogonalRegressionCoefficientTable.h"
 #include "ResponseTable.h"
 #include "math.h"
+#include <QTextCodec>
 
 IFactorTable& ExperimentTable::x() const
 {
@@ -172,6 +173,15 @@ bool ExperimentTable::save(const char *fileName)
     transform(fileExtension.begin(),fileExtension.end(),fileExtension.begin(),(int(*)(int))::tolower);
     if (!fileExtension.compare("csv")) {
         QTextStream stream(&file);
+        QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
+        if (codec!= NULL)
+        {
+            stream.setCodec(codec);
+        }
+        else
+        {
+            assert(1);
+        }
         //stream << CURRENT_FILE_FORMAT_VER;
         this->saveEvaluateFunctionToCSV(stream);
         _xTable->saveToCSV(stream);
