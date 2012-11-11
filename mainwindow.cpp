@@ -136,7 +136,7 @@ ui->pushButton_MAX->hide();
         }
         case 2:
         {
-            res=loadFromCSV();
+            res=NewExperimenLoadfromCSV();
             break;
         }
         }

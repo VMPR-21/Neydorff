@@ -210,13 +210,32 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         for(size_t i = 0; i < replica_row_count; i++)
         {
             tmpList = srcStream.readLine().split(QRegExp(";"));
-            if (1 < tmpList.length()) {
+            if (_paral + 1 == tmpList.length()) {
                 for(size_t j = 0; j < _paral; j++)
                 {
                     double value;
                     bool IsTrusted;
                     tmp = ExperimentTable::doubleWithDot(tmpList[1 + j]);
                     value = tmp.toDouble();
+                    YInfo yi;
+                    yi.Value = value;
+                    yi.IsTrusted = true;
+                    m_values[i].push_back(yi);
+                }
+                _experimentTable->y().set_at(i, m_values[i]); //add it to table
+            }
+            else
+            {
+                for(size_t j = 0; j < _paral; j++)
+                {
+                    double value;
+                    bool IsTrusted;
+                    if (tmpList.length() > j+1) {
+                        tmp = ExperimentTable::doubleWithDot(tmpList[1 + j]);
+                        value = tmp.toDouble();
+                    } else {
+                        value = 0;
+                    }
                     YInfo yi;
                     yi.Value = value;
                     yi.IsTrusted = true;
