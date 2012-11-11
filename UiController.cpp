@@ -75,6 +75,185 @@ UiController::~UiController()
     delete _experimentTable;
 }
 
+bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
+{
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly))
+        return false;
+    QTextStream srcStream(&file);
+
+    QStringList evaluateFunction;
+    int replicaDelimiter;
+    int factorCount;
+    int generalFactorCount;
+    int replica_row_count;
+    QString tmp_str = srcStream.readLine();
+    QString function = tmp_str.split(QRegExp(";"))[1];
+    QString measure = "";
+    if ("" != function) {
+        measure = srcStream.readLine().split(QRegExp(";"))[1];
+        evaluateFunction << function << measure;
+    } else {
+        evaluateFunction << "" << "";
+    }
+
+    QString tmp;
+    QStringList descriptions;
+    QStringList tmpList;
+    std::vector<double> *center;
+    std::vector<double> *delta;
+    double num;
+    tmp = srcStream.readLine();
+    if ("" == tmp.split(QRegExp(";"))[1]) {
+        tmp = srcStream.readLine();
+    }
+    if ("" != tmp) {
+        tmp = tmp.split(QRegExp(";"))[1];
+        factorCount = tmp.toInt();
+        tmp = srcStream.readLine().split(QRegExp(";"))[1];
+        replica_row_count = tmp.toInt();
+        tmp = srcStream.readLine().split(QRegExp(";"))[1];
+        replicaDelimiter = tmp.toInt();
+        tmp = srcStream.readLine().split(QRegExp(";"))[1];
+        generalFactorCount = tmp.toInt();
+
+        srcStream.readLine();
+
+        center = new std::vector<double>(factorCount);
+        delta  = new std::vector<double>(factorCount);
+        for(size_t i = 0; i < factorCount; i++)
+        {
+            tmpList = srcStream.readLine().split(QRegExp(";"));
+            tmp = ExperimentTable::doubleWithDot(tmpList[1]);
+            num = tmp.toDouble();
+            center->at(i) = num;
+        }
+        srcStream.readLine();
+        for(size_t i = 0; i < factorCount; i++)
+        {
+            tmpList = srcStream.readLine().split(QRegExp(";"));
+            tmp = ExperimentTable::doubleWithDot(tmpList[1]);
+            num = tmp.toDouble();
+            delta->at(i) = num*2;
+        }
+
+        quint64 descrCount;
+        tmp = srcStream.readLine().split(QRegExp(";"))[1];
+        descrCount = tmp.toULongLong();
+        srcStream.readLine();
+        if(descrCount > 0)
+        {
+            for(size_t i = 0; i < descrCount; i++)
+            {
+                tmpList = srcStream.readLine().split(QRegExp(";"));
+                QString d = ExperimentTable::doubleWithDot(tmpList[1]);;
+                descriptions << d.replace("\"","");
+            }
+        }
+        QString intLevString = srcStream.readLine().split(QRegExp(";"))[1];
+        _interactionLevel = intLevString.toInt();
+    }
+    quint64 size;
+    vector<vector<YInfo> > m_values;
+    srcStream.readLine();
+    tmp = srcStream.readLine();
+    if ("" != tmp) {
+        tmp = tmp.split(QRegExp(";"))[1];
+        _paral = tmp.toULongLong();
+    }
+    ResponcesSourseFunction *src = new ResponcesSourseFunction();
+    src->ActualFactNum = generalFactorCount;
+    src->FactNum = factorCount;
+    src->MinFactNum = -1;
+    src->parall = _paral;
+    src->PFEnum = pow(2., src->FactNum);
+    src->Descriptions = descriptions;
+    src->FactDivergences = *delta;
+    src->FactValues = *center;
+    if ("" == function)
+    {
+        src->SetEvaluateFunction("","");
+    }
+    else
+    {
+        QString tmpstr=function;
+        if ("degrees" == measure)
+        {
+            tmpstr=src->CheckFormulaForTrinometricFunctions(tmpstr);
+        }
+        src->SetEvaluateFunction(function,tmpstr);
+    }
+    src->DrobRepl=2./3;
+    _dataSrc = src;
+
+    _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, factorCount, replicaDelimiter, _interactionLevel, evaluateFunction.at(0), evaluateFunction.at(1));
+
+
+    _experimentTable->x().setFactorsDescriptions(descriptions);
+
+    assert(_dataSrc->inputsCount() == _experimentTable->x().count());
+    assert(_dataSrc->actualInputsCount() == _experimentTable->x().generalFactorCount());
+    assert(_experimentTable->rowCount() >= pow(2., _dataSrc->actualInputsCount()));
+
+    _experimentTable->x().setFactorsDescriptions(_dataSrc->getDescriptions());
+
+    for(int i = 0; i < _dataSrc->inputsCount(); i++)
+    {
+        _experimentTable->x().setXcenter(i, _dataSrc->centerFor(i));
+        double min, max;
+        _dataSrc->intervalFor(i, &min, &max);
+        _experimentTable->x().setXdelta(i, max / 2.);
+    }
+    if ("" == evaluateFunction.at(0)) {
+    m_values.resize(replica_row_count);
+        for(size_t i = 0; i < replica_row_count; i++)
+        {
+            tmpList = srcStream.readLine().split(QRegExp(";"));
+            if (1 < tmpList.length()) {
+                for(size_t j = 0; j < _paral; j++)
+                {
+                    double value;
+                    bool IsTrusted;
+                    tmp = ExperimentTable::doubleWithDot(tmpList[1 + j]);
+                    value = tmp.toDouble();
+                    YInfo yi;
+                    yi.Value = value;
+                    yi.IsTrusted = true;
+                    m_values[i].push_back(yi);
+                }
+                _experimentTable->y().set_at(i, m_values[i]); //add it to table
+            }
+        }
+    } else {
+        for(int i = 0; i < _experimentTable->rowCount(); i++)
+        {
+            std::vector<int> coords;
+
+            for(int j = 0; j < _experimentTable->x().count(); j++)
+                coords.push_back((int)_experimentTable->x().norm_at(j, i));
+
+            std::vector<double> yy = _dataSrc->getYdata(coords); //request y data for coords.
+            std::vector<YInfo> info;
+
+            for(size_t j = 0; j < yy.size(); j++)
+            {
+                YInfo inf;
+                inf.IsTrusted = true;
+                inf.Value = yy[j];
+                info.push_back(inf);
+            }
+
+            _experimentTable->y().set_at(i, info); //add it to table
+        }
+    }
+    _view->updateInputs(*_experimentTable);
+    if (_isFormulaModel)
+        _view->updateYY(*_experimentTable);
+
+    return true;
+}
+
 bool UiController::loadModel(const QString &fileName)
 {
     //_experimentTable->load(fileName.toAscii().data());

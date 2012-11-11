@@ -48,6 +48,7 @@ public:
     //Реализация IUiController
     bool newModel(bool createEmpty = false, bool isFormulaModel = false);
     //void newModel(bool createEmpty = false, bool isFormulaModel = false);
+    bool NewExperimenLoadfromCSV(const QString &fileName);
 
     void newModellGrad(bool _isFormulaModel2);
 
