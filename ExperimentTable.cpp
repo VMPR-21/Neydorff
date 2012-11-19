@@ -139,6 +139,7 @@ bool ExperimentTable::load(const char *fileName)
         QTextStream stream(&file);
         this->loadEvaluateFunctionFromCSV(stream);
         _xTable->loadFromCSV(stream);
+        this->loadExtrFromCSV(stream);
         _yTable->loadFromCSV(stream);
         _bTable->loadFromCSV(stream);
     }
@@ -152,7 +153,6 @@ bool ExperimentTable::load(const char *fileName)
             return false;
         this->loadEvaluateFunction(stream);
         _xTable->loadFrom(stream);
-        this->loadExtrFromCSV(stream);
         _yTable->loadFrom(stream);
         _bTable->loadFrom(stream);
     }
@@ -394,10 +394,13 @@ void ExperimentTable::loadExtrFromCSV(QTextStream &srcStream)
     QString tmp = srcStream.readLine();
     tmp = tmp.split(QRegExp(";"))[1];
     this->isMax = tmp.toInt();
+    tmp = srcStream.readLine();
     tmp = tmp.split(QRegExp(";"))[1];
     this->strideParameter = tmp.toDouble();
+    tmp = srcStream.readLine();
     tmp = tmp.split(QRegExp(";"))[1];
     this->numberStride = tmp.toInt();
+    tmp = srcStream.readLine();
     tmp = tmp.split(QRegExp(";"))[1];
     this->interestAllowedDeviation = tmp.toDouble();
 }
