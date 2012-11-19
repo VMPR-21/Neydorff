@@ -152,6 +152,7 @@ bool ExperimentTable::load(const char *fileName)
             return false;
         this->loadEvaluateFunction(stream);
         _xTable->loadFrom(stream);
+        this->loadExtrFromCSV(stream);
         _yTable->loadFrom(stream);
         _bTable->loadFrom(stream);
     }
@@ -185,6 +186,7 @@ bool ExperimentTable::save(const char *fileName)
         //stream << CURRENT_FILE_FORMAT_VER;
         this->saveEvaluateFunctionToCSV(stream);
         _xTable->saveToCSV(stream);
+        this->saveExtrToCSV(stream);
         _yTable->saveToCSV(stream);
         _bTable->saveToCSV(stream);
     } else {
@@ -235,6 +237,14 @@ IExperimentTable* ExperimentTable::createGradientExperimentTable(int factor_coun
     expTable->_bTable =  RegressionCoefficientTable::Create(FullFactorGradient, factor_count, interaction_level);
     expTable->evaluateFunction.clear();
     expTable->evaluateFunction << displeyFunction << cornerMeasure;
+
+    // От Коли
+    expTable->isMax = true;
+    expTable->strideParameter = 0.50;
+    expTable->numberStride = 7;
+    expTable->interestAllowedDeviation = 30;
+    // От Коли
+
     return expTable;
 }
 
@@ -250,6 +260,14 @@ IExperimentTable* ExperimentTable::createCentralCompositeExperimentTable(int fac
     expTable->_bTable = RegressionCoefficientTable::Create(CentralOrtogonalComposite, factor_count, interaction_level);
     expTable->evaluateFunction.clear();
     expTable->evaluateFunction << displeyFunction << cornerMeasure;
+
+    // От Коли
+    expTable->isMax = true;
+    expTable->strideParameter = 0.50;
+    expTable->numberStride = 7;
+    expTable->interestAllowedDeviation = 30;
+    // От Коли
+
     return expTable;
 }
 
@@ -342,4 +360,44 @@ void ExperimentTable::setEvaluateFunction(QString evaluate, QString measure)
 QStringList ExperimentTable::getEvaluateFunction()
 {
     return this->evaluateFunction;
+}
+// От Коли
+bool ExperimentTable::getIsMax() const
+{ return this->isMax;}
+double ExperimentTable::getStrideParameter() const
+{ return this->strideParameter;}
+int ExperimentTable::getNumberStride() const
+{ return this->numberStride;}
+double ExperimentTable::getInterestAllowedDeviation() const
+{ return this->interestAllowedDeviation;}
+
+void ExperimentTable::setIsMax(bool isMax) const
+{ this->isMax = isMax;}
+void ExperimentTable::setStrideParameter(double strideParameter) const
+{ this->strideParameter = strideParameter;}
+void ExperimentTable::setNumberStride(int numberStride) const
+{ this->numberStride = numberStride;}
+void ExperimentTable::setInterestAllowedDeviation(double interestAllowedDeviation) const
+{ this->interestAllowedDeviation = interestAllowedDeviation;}
+
+void ExperimentTable::saveExtrToCSV(QTextStream &srcStream)
+{
+    srcStream << QString::fromUtf8("ВОСХОЖДЕНИЕ ПО ГРАДИЕНТУ") << ";\r\n";
+    srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
+    srcStream << QString::fromUtf8("Величина шага:") << ";" << this->strideParameter << ";\r\n";
+    srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
+    srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << this->interestAllowedDeviation << ";\r\n";
+}
+void ExperimentTable::loadExtrFromCSV(QTextStream &srcStream)
+{
+    srcStream.readLine();
+    QString tmp = srcStream.readLine();
+    tmp = tmp.split(QRegExp(";"))[1];
+    this->isMax = tmp.toInt();
+    tmp = tmp.split(QRegExp(";"))[1];
+    this->strideParameter = tmp.toDouble();
+    tmp = tmp.split(QRegExp(";"))[1];
+    this->numberStride = tmp.toInt();
+    tmp = tmp.split(QRegExp(";"))[1];
+    this->interestAllowedDeviation = tmp.toDouble();
 }

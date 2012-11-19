@@ -38,8 +38,21 @@ public:
     void loadEvaluateFunctionFromCSV(QTextStream &srcStream);
     void saveEvaluateFunctionToCSV(QTextStream &srcStream);
 
+    void saveExtrToCSV(QTextStream &srcStream);
+    void loadExtrFromCSV(QTextStream &srcStream);
+
     void setEvaluateFunction(QString evaluate, QString measure);
     QStringList getEvaluateFunction();
+
+    bool getIsMax() const;
+    double getStrideParameter() const;
+    int getNumberStride() const;
+    double getInterestAllowedDeviation() const;
+
+    void setIsMax(bool isMax) const;
+    void setStrideParameter(double strideParameter) const;
+    void setNumberStride(int numberStride) const;
+    void setInterestAllowedDeviation(double interestAllowedDeviation) const;
 
 protected:
     //фабричные методы, создающие конкретные экземпляры необходимых объектов.
@@ -52,6 +65,13 @@ private:
     IResponseTable *_yTable;
     IRegressionCoefficientTable *_bTable;
     QStringList evaluateFunction;
+
+    // От Коли
+    mutable bool isMax;
+    mutable double strideParameter; //h
+    mutable int numberStride; //ch
+    mutable double interestAllowedDeviation; //dev
+    // От Коли
 
     ExperimentTable();
     static IExperimentTable* createCentralCompositeExperimentTable(int factor_count, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "");

@@ -37,6 +37,17 @@ public:
     virtual bool load(const char *fileName) = 0;
     virtual bool save(const char *fileName) = 0;
 
+    // От Коли
+    virtual bool getIsMax() const = 0;
+    virtual double getStrideParameter() const = 0;
+    virtual int getNumberStride() const = 0;
+    virtual double getInterestAllowedDeviation() const = 0;
+
+    virtual void setIsMax(bool isMax) const = 0;
+    virtual void setStrideParameter(double strideParameter) const = 0;
+    virtual void setNumberStride(int numberStride) const = 0;
+    virtual void setInterestAllowedDeviation(double interestAllowedDeviation) const = 0;
+
     virtual ~IExperimentTable() {}
 };
 
