@@ -2,6 +2,7 @@
 #define IEXPERIMENTTABLE_H
 
 #include <vector>
+#include "Experementator.h"
 
 class ICriteria;
 class IFactorTable;
@@ -48,6 +49,7 @@ public:
     virtual void setStrideParameter(double strideParameter) const = 0;
     virtual void setNumberStride(int numberStride) const = 0;
     virtual void setInterestAllowedDeviation(double interestAllowedDeviation) const = 0;
+    virtual void setExperimentPoint(std::vector<ExperimentPoint> v) const = 0;
 
     virtual ~IExperimentTable() {}
 };

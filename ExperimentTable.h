@@ -6,6 +6,7 @@
 #include "IResponseTable.h"
 #include "IRegressionCoefficientTable.h"
 #include "TableType.h"
+#include "Experementator.h"
 
 //Основная таблица эксперимента. Содержит в себе все необходимое.
 class ExperimentTable : public IExperimentTable
@@ -44,6 +45,8 @@ public:
     void saveExtrToCSV(QTextStream &srcStream);
     void saveExtrToCSV(QTextStream &srcStream) const;
     void loadExtrFromCSV(QTextStream &srcStream);
+    void saveExperimentPointToCSV(QTextStream &srcStream);
+    void saveExperimentPointToCSV(QTextStream &srcStream) const;
 
     void setEvaluateFunction(QString evaluate, QString measure);
     QStringList getEvaluateFunction();
@@ -57,6 +60,7 @@ public:
     void setStrideParameter(double strideParameter) const;
     void setNumberStride(int numberStride) const;
     void setInterestAllowedDeviation(double interestAllowedDeviation) const;
+    void setExperimentPoint(std::vector<ExperimentPoint> v) const;
 
 protected:
     //фабричные методы, создающие конкретные экземпляры необходимых объектов.
@@ -75,6 +79,7 @@ private:
     mutable double strideParameter; //h
     mutable int numberStride; //ch
     mutable double interestAllowedDeviation; //dev
+    mutable std::vector<ExperimentPoint> v;
     // От Коли
 
     ExperimentTable();

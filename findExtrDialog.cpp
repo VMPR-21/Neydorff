@@ -11,6 +11,7 @@
 #include "QModelIndex"
 #include "mainwindow.h"
 #include <QtGui>
+#include <QSettings>
 
 findExtrDialog::findExtrDialog(QWidget *parent) :
     QDialog(parent),
@@ -1203,6 +1204,11 @@ void findExtrDialog::on_pushButton_2_clicked()
     table->setStrideParameter(ui->doubleSpinBox->value());
     table->setNumberStride(ui->spinBox_3->value());
     table->setInterestAllowedDeviation(ui->spinBox_2->value());
+    table->setExperimentPoint(v);
+
+    QSettings *setting = new QSettings("params.trolo", QSettings::IniFormat);
+    setting->setValue("ini/grad", QString::fromUtf8("ВОСХОЖДЕНИЕ ПО ГРАДИЕНТУ"));
+    setting->sync();
 
     QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)"));
 //    this->table->save(fileName.toAscii().data());

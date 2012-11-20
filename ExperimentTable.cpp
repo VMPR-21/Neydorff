@@ -189,6 +189,7 @@ bool ExperimentTable::save(const char *fileName)
         this->saveExtrToCSV(stream);
         _yTable->saveToCSV(stream);
         _bTable->saveToCSV(stream);
+        this->saveExperimentPointToCSV(stream);
     } else {
         DataStream stream(&file);
         stream << CURRENT_FILE_FORMAT_VER;
@@ -229,6 +230,7 @@ bool ExperimentTable::save(const char *fileName) const
         this->saveExtrToCSV(stream);
         _yTable->saveToCSV(stream);
         _bTable->saveToCSV(stream);
+        this->saveExperimentPointToCSV(stream);
     } else {
         DataStream stream(&file);
         stream << CURRENT_FILE_FORMAT_VER;
@@ -449,7 +451,7 @@ void ExperimentTable::setInterestAllowedDeviation(double interestAllowedDeviatio
 
 void ExperimentTable::saveExtrToCSV(QTextStream &srcStream)
 {
-    srcStream << QString::fromUtf8("ВОСХОЖДЕНИЕ ПО ГРАДИЕНТУ") << ";\r\n";
+    srcStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
     srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
     srcStream << QString::fromUtf8("Величина шага:") << ";" << this->strideParameter << ";\r\n";
     srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
@@ -458,7 +460,7 @@ void ExperimentTable::saveExtrToCSV(QTextStream &srcStream)
 
 void ExperimentTable::saveExtrToCSV(QTextStream &srcStream) const
 {
-    srcStream << QString::fromUtf8("ВОСХОЖДЕНИЕ ПО ГРАДИЕНТУ") << ";\r\n";
+    srcStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
     srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
     srcStream << QString::fromUtf8("Величина шага:") << ";" << ExperimentTable::doubleWithComma(this->strideParameter) << ";\r\n";
     srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
@@ -480,4 +482,59 @@ void ExperimentTable::loadExtrFromCSV(QTextStream &srcStream)
     tmp = srcStream.readLine();
     tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
     this->interestAllowedDeviation = tmp.toDouble();
+}
+
+void ExperimentTable::setExperimentPoint(std::vector<ExperimentPoint> v) const
+{
+    this->v = v;
+}
+
+void ExperimentTable::saveExperimentPointToCSV(QTextStream &srcStream)
+{
+    if (0 < this->v.size())
+    {
+        ExperimentPoint aught = v[0];
+        srcStream << QString::fromUtf8("ГРАДИЕНТ") << ";";
+        for (int i = 0; i < aught.xs.size(); i++) {
+            srcStream << QString::fromUtf8("x") << i << ";";
+        }
+        srcStream << QString::fromUtf8("Y grad") << ";";
+        srcStream << QString::fromUtf8("Y real") << ";\r\n";
+
+        for (int i = 0; i < this->v.size(); i++)
+        {
+            aught = v.at(i);
+            srcStream << QString::fromUtf8("Шаг ") << i+1 << ";";
+            for (int j = 0; j < aught.xs.size(); j++) {
+                srcStream << ExperimentTable::doubleWithComma(aught.xs[j]) << ";";
+            }
+            srcStream << ExperimentTable::doubleWithComma(aught.yt) << ';';
+            srcStream << ExperimentTable::doubleWithComma(aught.yp) << ";\r\n";
+        }
+    }
+}
+
+void ExperimentTable::saveExperimentPointToCSV(QTextStream &srcStream) const
+{
+    if (0 < this->v.size())
+    {
+        ExperimentPoint aught = v[0];
+        srcStream << QString::fromUtf8("ГРАДИЕНТ") << ";";
+        for (int i = 0; i < aught.xs.size(); i++) {
+            srcStream << QString::fromUtf8("x") << i << ";";
+        }
+        srcStream << QString::fromUtf8("Y grad") << ";";
+        srcStream << QString::fromUtf8("Y real") << ";\r\n";
+
+        for (int i = 0; i < this->v.size(); i++)
+        {
+            aught = v.at(i);
+            srcStream << QString::fromUtf8("Шаг ") << i+1 << ";";
+            for (int j = 0; j < aught.xs.size(); j++) {
+                srcStream << ExperimentTable::doubleWithComma(aught.xs[j]) << ";";
+            }
+            srcStream << ExperimentTable::doubleWithComma(aught.yt) << ';';
+            srcStream << ExperimentTable::doubleWithComma(aught.yp) << ";\r\n";
+        }
+    }
 }
