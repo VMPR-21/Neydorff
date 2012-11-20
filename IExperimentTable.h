@@ -36,6 +36,7 @@ public:
     //загрузка и сохранение в файл содержимого таблицы.
     virtual bool load(const char *fileName) = 0;
     virtual bool save(const char *fileName) = 0;
+    virtual bool save(const char *fileName) const = 0;
 
     // От Коли
     virtual bool getIsMax() const = 0;

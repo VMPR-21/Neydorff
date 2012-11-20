@@ -200,6 +200,46 @@ bool ExperimentTable::save(const char *fileName)
     return true;
 }
 
+bool ExperimentTable::save(const char *fileName) const
+{
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::WriteOnly))
+        return false;
+
+    // а вот здесь нужно получить из имени файла его расширение
+    // и если оно равно "csv", то сохраняем в csv
+    string fileExtension = string(fileName);
+    fileExtension = fileExtension.substr(fileExtension.find_last_of(".")+1);
+    transform(fileExtension.begin(),fileExtension.end(),fileExtension.begin(),(int(*)(int))::tolower);
+    if (!fileExtension.compare("csv")) {
+        QTextStream stream(&file);
+        QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
+        if (codec!= NULL)
+        {
+            stream.setCodec(codec);
+        }
+        else
+        {
+            assert(1);
+        }
+        //stream << CURRENT_FILE_FORMAT_VER;
+        this->saveEvaluateFunctionToCSV(stream);
+        _xTable->saveToCSV(stream);
+        this->saveExtrToCSV(stream);
+        _yTable->saveToCSV(stream);
+        _bTable->saveToCSV(stream);
+    } else {
+        DataStream stream(&file);
+        stream << CURRENT_FILE_FORMAT_VER;
+        this->saveEvaluateFunction(stream);
+        _xTable->saveTo(stream);
+        _yTable->saveTo(stream);
+        _bTable->saveTo(stream);
+    }
+    return true;
+}
+
 //ExperimentTable::ExperimentTable(int factor_count, int row_count, int replica_delimiter)
 //{
 //TODO: FIX. ERROR!!! virtual func. call from .ctor() !!
@@ -317,7 +357,34 @@ void ExperimentTable::saveEvaluateFunction(DataStream &srcStream)
     }
 }
 
+void ExperimentTable::saveEvaluateFunction(DataStream &srcStream) const
+{
+    if ("" != this->evaluateFunction.at(0)) {
+        srcStream  << 1; // будет записывать 1 если есть фонмула
+        srcStream  << this->evaluateFunction.at(0);
+        if (this->evaluateFunction.at(1).contains("/*degrees*/")) {
+            srcStream << "degrees";
+        } else {
+            srcStream << "radian";
+        }
+    } else {
+        srcStream  << (quint64)0; // будет записывать 0 если нет фонмулы
+    }
+}
+
 void ExperimentTable::saveEvaluateFunctionToCSV(QTextStream &srcStream)
+{
+    if ("" != this->evaluateFunction.at(0)) {
+        srcStream << QString::fromUtf8("Функция:") << ";" << this->evaluateFunction.at(0) << ";\r\n";
+        if (this->evaluateFunction.at(1).contains("/*degrees*/")) {
+            srcStream << QString::fromUtf8("Мера угла:") << ";" << "degrees" << ";\r\n";
+        } else {
+            srcStream << QString::fromUtf8("Мера угла:") << ";" << "radian" << ";\r\n";
+        }
+    }
+}
+
+void ExperimentTable::saveEvaluateFunctionToCSV(QTextStream &srcStream) const
 {
     if ("" != this->evaluateFunction.at(0)) {
         srcStream << QString::fromUtf8("Функция:") << ";" << this->evaluateFunction.at(0) << ";\r\n";
@@ -388,6 +455,16 @@ void ExperimentTable::saveExtrToCSV(QTextStream &srcStream)
     srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
     srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << this->interestAllowedDeviation << ";\r\n";
 }
+
+void ExperimentTable::saveExtrToCSV(QTextStream &srcStream) const
+{
+    srcStream << QString::fromUtf8("ВОСХОЖДЕНИЕ ПО ГРАДИЕНТУ") << ";\r\n";
+    srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
+    srcStream << QString::fromUtf8("Величина шага:") << ";" << ExperimentTable::doubleWithComma(this->strideParameter) << ";\r\n";
+    srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
+    srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << ExperimentTable::doubleWithComma(this->interestAllowedDeviation) << ";\r\n";
+}
+
 void ExperimentTable::loadExtrFromCSV(QTextStream &srcStream)
 {
     srcStream.readLine();
@@ -395,12 +472,12 @@ void ExperimentTable::loadExtrFromCSV(QTextStream &srcStream)
     tmp = tmp.split(QRegExp(";"))[1];
     this->isMax = tmp.toInt();
     tmp = srcStream.readLine();
-    tmp = tmp.split(QRegExp(";"))[1];
+    tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
     this->strideParameter = tmp.toDouble();
     tmp = srcStream.readLine();
     tmp = tmp.split(QRegExp(";"))[1];
     this->numberStride = tmp.toInt();
     tmp = srcStream.readLine();
-    tmp = tmp.split(QRegExp(";"))[1];
+    tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
     this->interestAllowedDeviation = tmp.toDouble();
 }

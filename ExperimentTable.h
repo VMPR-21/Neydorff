@@ -32,13 +32,17 @@ public:
 
     bool load(const char *fileName);
     bool save(const char *fileName);
+    bool save(const char *fileName) const;
 
     void saveEvaluateFunction(DataStream &srcStream);
+    void saveEvaluateFunction(DataStream &srcStream) const;
     void loadEvaluateFunction(DataStream &srcStream);
     void loadEvaluateFunctionFromCSV(QTextStream &srcStream);
     void saveEvaluateFunctionToCSV(QTextStream &srcStream);
+    void saveEvaluateFunctionToCSV(QTextStream &srcStream) const;
 
     void saveExtrToCSV(QTextStream &srcStream);
+    void saveExtrToCSV(QTextStream &srcStream) const;
     void loadExtrFromCSV(QTextStream &srcStream);
 
     void setEvaluateFunction(QString evaluate, QString measure);

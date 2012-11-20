@@ -46,7 +46,7 @@ class findExtrDialog : public QDialog
 public:
     explicit findExtrDialog(QWidget *parent = 0);
     ~findExtrDialog();
-    void startfindExtr(const IExperimentTable &table, IResponcesSource &_src);
+    void startfindExtr(IExperimentTable &table, IResponcesSource &_src);
 
     std::vector<ExperimentPoint> v;
     bool isExtremFound;
@@ -64,6 +64,9 @@ public:
 
     bool isFormulaExperiment;
 
+    void saveToCSV(const QString &fileName);
+
+
 private slots:
     void on_tableWidget_2_cellChanged();
 
@@ -80,6 +83,8 @@ private slots:
     void on_radioButton_2_clicked();
 
     void on_tableWidget_2_doubleClicked(const QModelIndex &index);
+
+    void on_pushButton_2_clicked();
 
 private:
     Ui::findExtrDialog *ui;

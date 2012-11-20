@@ -9,8 +9,8 @@
 #include <math.h>
 #include "Experementator.h"
 #include "QModelIndex"
-
-
+#include "mainwindow.h"
+#include <QtGui>
 
 findExtrDialog::findExtrDialog(QWidget *parent) :
     QDialog(parent),
@@ -25,7 +25,7 @@ findExtrDialog::~findExtrDialog()
     delete ui;
 }
 
-void findExtrDialog::startfindExtr(const IExperimentTable &table, IResponcesSource &src)
+void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &src)
 {
     ui->pushButton_CCP->setDisabled(true);
     ui->pushButton_Experiment->setDisabled(true);
@@ -43,11 +43,25 @@ void findExtrDialog::startfindExtr(const IExperimentTable &table, IResponcesSour
 
     //QTableWidgetItem* ptwi = 0;
 
-    if(ui->radioButton->isChecked()) isMax = true;
-        else isMax = false;
-    h = ui->doubleSpinBox->value();
-    ch = ui->spinBox_3->value();
-    dev = ui->spinBox_2->value();
+    isMax = table.getIsMax();
+    if (isMax) {
+        ui->radioButton->setChecked(true);
+    } else {
+        ui->radioButton_2->setChecked(true);
+    }
+
+    h = table.getStrideParameter();
+    ui->doubleSpinBox->setValue(h);
+
+    ch = table.getNumberStride();
+    ui->spinBox_3->setValue(ch);
+
+    dev = table.getInterestAllowedDeviation();
+    ui->spinBox_2->setValue(dev);
+
+
+
+
 
     std::vector<bCoeff> bCoefs = table.b().coeffs();
 
@@ -353,6 +367,24 @@ void findExtrDialog::restartfindExtr()
     h = ui->doubleSpinBox->value();
     ch = ui->spinBox_3->value();
     dev = ui->spinBox_2->value();
+
+    isMax = table->getIsMax();
+    if (isMax) {
+        ui->radioButton->setChecked(true);
+    } else {
+        ui->radioButton_2->setChecked(true);
+    }
+
+    h = table->getStrideParameter();
+    ui->doubleSpinBox->setValue(h);
+
+    ch = table->getNumberStride();
+    ui->spinBox_3->setValue(ch);
+
+    dev = table->getInterestAllowedDeviation();
+    ui->spinBox_2->setValue(dev);
+
+
 
     std::vector<bCoeff> bCoefs = this->table->b().coeffs();
 
@@ -1164,4 +1196,20 @@ void findExtrDialog::on_tableWidget_2_doubleClicked(const QModelIndex &index)
             ui->label_4->setText("Выбран шаг " + QString::number(this->index1+1) +" и " + QString::number(this->index2+1));
         else
             ui->label_4->setText("Выбран шаг " + QString::number(this->index1+1));
+}
+void findExtrDialog::on_pushButton_2_clicked()
+{
+    table->setIsMax(ui->radioButton->isChecked());
+    table->setStrideParameter(ui->doubleSpinBox->value());
+    table->setNumberStride(ui->spinBox_3->value());
+    table->setInterestAllowedDeviation(ui->spinBox_2->value());
+
+    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)"));
+//    this->table->save(fileName.toAscii().data());
+    this->saveToCSV(fileName);
+
+}
+void findExtrDialog::saveToCSV(const QString &fileName)
+{
+    this->table->save(fileName.toAscii().data());
 }
