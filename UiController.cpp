@@ -153,7 +153,22 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         }
         QString intLevString = srcStream.readLine().split(QRegExp(";"))[1];
         _interactionLevel = intLevString.toInt();
-    }
+    } 
+
+    srcStream.readLine();
+    tmp = srcStream.readLine();
+    tmp = tmp.split(QRegExp(";"))[1];
+    bool isMax = tmp.toInt();
+    tmp = srcStream.readLine();
+    tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
+    double strideParameter = tmp.toDouble();
+    tmp = srcStream.readLine();
+    tmp = tmp.split(QRegExp(";"))[1];
+    int numberStride = tmp.toInt();
+    tmp = srcStream.readLine();
+    tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
+    double interestAllowedDeviation = tmp.toDouble();
+
     quint64 size;
     vector<vector<YInfo> > m_values;
     tmp = srcStream.readLine();
@@ -189,6 +204,10 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
 
         _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, factorCount, replicaDelimiter, _interactionLevel, evaluateFunction.at(0), evaluateFunction.at(1));
 
+        _experimentTable->setIsMax(isMax);
+        _experimentTable->setStrideParameter(strideParameter);
+        _experimentTable->setNumberStride(numberStride);
+        _experimentTable->setInterestAllowedDeviation(interestAllowedDeviation);
 
         _experimentTable->x().setFactorsDescriptions(descriptions);
 
