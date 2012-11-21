@@ -2,6 +2,15 @@
 #ifndef NewExperimentSettingsDialog_H
 #define NewExperimentSettingsDialog_H
 
+// Factor tableview params
+#define FACT_NAME_COLUMN 1
+#define FACT_CENTER_COLUMN 2
+#define FACT_DIAPAZON_COLUMN 3
+#define FACT_MIN_COLUMN 4
+#define FACT_MAX_COLUMN 5
+#define FACT_INTERVAL_COLUMN 6
+
+
 #include <QDialog>
 #include <QMessageBox>
 #include <QMenuBar>
@@ -10,6 +19,7 @@
 #include <QtAlgorithms>
 #include <math.h>
 #include <QFileDialog>
+#include <QSettings>
 
 #include "IModelSettingsView.h"
 #include "ResponcesSource.h"
@@ -21,6 +31,9 @@
 
 #include "formula_setting_help_dialog.h"
 
+#define MATHMODEL 1
+#define OPTIMASEARCH 2
+
 namespace Ui
 {
 class NewExperimentSettingsDialog;
@@ -31,7 +44,7 @@ class NewExperimentSettingsDialog : public QDialog, public IModelSettingsView
     Q_OBJECT
 
 public:
-    explicit NewExperimentSettingsDialog(IResponcesSource* pDataSource = NULL, int _interaction_level = 1, int _paral = 0, QWidget *parent = 0);
+    explicit NewExperimentSettingsDialog(short ModelType = MATHMODEL, IResponcesSource *pDataSource = NULL, int _interaction_level = 0, int _paral = 0, QWidget *parent=0);
     virtual ~NewExperimentSettingsDialog();
 
     //получение источника данных
@@ -74,6 +87,7 @@ private:
     Ui::NewExperimentSettingsDialog *ui;
 
     int _interaction_level;
+    short _modelType;
 
     int _paral;
     //ResponcesSourse data;

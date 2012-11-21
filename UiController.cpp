@@ -18,7 +18,10 @@
 #include "ExperimentDialog.h"
 #include "bCoeff.h"
 #include "findExtrDialog.h"
+#include "savedirectorypathdialog.h"
+
 #include <assert.h>
+
 
 #include "NewExperimentSettingsDialog.h"
 UiController::UiController(IView *view): _dataSrc(NULL), _formatterView(new NumberFormatDialog), _formatter(NULL), _view(view)
@@ -28,15 +31,17 @@ UiController::UiController(IView *view): _dataSrc(NULL), _formatterView(new Numb
     _interactionLevel = 1;
     _isFormulaModel = false;
     _paral = 0;
+    _ModelType = MATHMODEL;
 }
 
-bool UiController::newModel(bool createEmpty, bool isFormulaModel)
+bool UiController::newModel(short ModelType,bool createEmpty, bool isFormulaModel)
 {
     _experimentTable = NULL;
     _modelHasData = false;
     _interactionLevel = 1;
     _paral = 0;
     _isFormulaModel =true;// isFormulaModel;
+    _ModelType = ModelType;
 
     delete _dataSrc;
     _dataSrc = NULL;
@@ -153,7 +158,7 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         }
         QString intLevString = srcStream.readLine().split(QRegExp(";"))[1];
         _interactionLevel = intLevString.toInt();
-    } 
+    }
 
     srcStream.readLine();
     tmp = srcStream.readLine();
@@ -298,6 +303,7 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
 
 bool UiController::loadModel(const QString &fileName)
 {
+    if (fileName=="") return false;
     //_experimentTable->load(fileName.toAscii().data());
     bool r = _experimentTable->load(fileName.toAscii().data());
 
@@ -489,7 +495,13 @@ void UiController::calcExtremum(bool isMax)
 
 bool UiController::changeModelParams()
 {
-    IModelSettingsView *settings = (IModelSettingsView*) new NewExperimentSettingsDialog(_dataSrc,_interactionLevel, _paral);
+    IModelSettingsView *settings =
+            (IModelSettingsView*)
+            new NewExperimentSettingsDialog(
+                        _ModelType,
+                        _dataSrc,
+                        _interactionLevel,
+                        _paral);
 
             /*_isFormulaModel ?
                                    (IModelSettingsView*)new FormulaSettingsDialog(_dataSrc, _interactionLevel) :
@@ -497,6 +509,7 @@ bool UiController::changeModelParams()
            */
     if (settings->askNewSettings())
     {
+
 
             if (_dataSrc!=NULL)
             {
@@ -583,7 +596,7 @@ bool UiController::changeModelParams()
 
 void UiController::changeModelParamsGrad()
 {
-    IModelSettingsView *settings = (IModelSettingsView*) new NewExperimentSettingsDialog(_dataSrc,_interactionLevel);
+    IModelSettingsView *settings = (IModelSettingsView*) new NewExperimentSettingsDialog(this->_ModelType,_dataSrc,_interactionLevel);
 
             /*_isFormulaModel ?
                                    (IModelSettingsView*)new FormulaSettingsDialog(_dataSrc, _interactionLevel) :
@@ -790,124 +803,187 @@ void UiController::calcFuncValue()
 
 void UiController::findExtr()
 {
-
-    //для проверки это формульный эксперимент или нет
-    std::vector<int> xxx;
-    for(int i = 0; i < _experimentTable->x().count(); i++)
+/*
+    QMessageBox msg;
+    msg.setText(QString::number(_experimentTable->factorCount())+'  '+QString::number(_experimentTable->b().count()));
+    msg.setWindowTitle("Предупреждение");
+    msg.setSizeGripEnabled(true);
+    msg.exec();*/
+   // for(int i = 0; i <= _experimentTable->x().count(); i++)
+    int c = 0;
+    for(int i = 0; i <  _experimentTable->b().count(); i++)
     {
-        xxx.push_back(1);
-    }
-
-    std::vector<double> yyy = _dataSrc->getYdata(xxx);
-
-    findExtrDialog CfindExtrDialog;
-
-    //если не производится расчет по формуле, то это не формульный эксперимент
-    if(yyy.size()==0)
-        CfindExtrDialog.isFormulaExperiment = false;
-    else
-       CfindExtrDialog.isFormulaExperiment = true;
-
-    CfindExtrDialog.startfindExtr(*_experimentTable, *_dataSrc);
-
-
-    IExperimentTable * exTable = NULL;
-    exTable = ExperimentTable::createExperimentTable(CentralOrtogonalComposite, _dataSrc->inputsCount(), _dataSrc->actualInputsCount(), _interactionLevel);
-    ExperimentDialog * exDialog = new ExperimentDialog();
-
-   // CHECK CALC EXTREMUM
-
-    _view->readData(_experimentTable);
-
-    std::vector<ExperimentPoint> vals = CfindExtrDialog.v;
-
-    bool isExtremeumFound = CfindExtrDialog.isExtremFound;
-
-    //assert(vals.at(vals.size() - 1).xs.size() == (size_t)_experimentTable->x().count()); // xs[0] is f
-
-    if((CfindExtrDialog.ccp==true)&&(CfindExtrDialog.exper==false))
-    {
-        _view->updateGr(*_experimentTable, vals); // + isExtremeumFound
-
-        exDialog->startDialog("ЦКП", exTable, _experimentTable, _interactionLevel);
-    }
-
-
-
-    std::vector<ExperimentPoint> vals2 = vals;
-    vals.clear();
-    for(int i = 0; i < vals2.size(); i++)
-    {
-       ExperimentPoint P = vals2[i];
-       std::vector<double> va;
-       for(int j = 0; j < P.xs.size(); j++)
-       {
-         //  remove(P.xs.begin(), P.xs.end(), 0 );
-           //if(P.xs[j]!=0)
-           std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
-           if (bCoefs[j+1].is_significant())
-           {
-               va.push_back(P.xs[j]);
-           }
-       }
-       P.xs.clear();
-       P.xs = va;
-
-       vals.push_back(P);
-    }
-
-    if ((CfindExtrDialog.exper == true)&&(CfindExtrDialog.ccp == false))
-    {
-        _modelHasData = true;
-
-        int pos=0;
-        int xspos=0;
-        _view->updateGr(*_experimentTable, vals);
-
-        int countSign = 0;
-
-        int countIsSign = 0;
-        for(int i = 0; i < _experimentTable->x().count(); i++)
+        std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
+        std::vector<int> ind = bCoefs[i].index();
+        QString s = "";
+        /*
+        for (int j = 0; j < ind.size(); j++)
+            s = s + QString::number(ind[j]) + ' ';
+            */
+        for(int j = 0; j < (int)ind.size(); j++)
         {
-            std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
-            if (bCoefs[i+1].is_significant())
-            {
-                countIsSign++;
-            }
-         }
-
-        for(int i = 0; i < ((ExperimentPoint)vals[i]).xs.size(); i++)
-        {
-            std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
-            //if (((ExperimentPoint)vals.at(0)).xs.at(xspos)!= 0)
-            if (bCoefs[i+1].is_significant())
-            {
-                _experimentTable->x().setXcenter(pos, vals.at(vals.size() - 1).xs.at(xspos));
-                pos++;
-            }
-            else
-            {
-                countSign++;
-            }
-            xspos++;
-
+            s += QString::number(ind[j]);
+            //str+=" ";
         }
 
-        ResponcesSourseFunction *src = new ResponcesSourseFunction((ResponcesSourseFunction&)*_dataSrc);
-        std::vector<double> v;
 
-        src->FactNum = (((ExperimentPoint)vals[0]).xs.size() - countSign);
-        src->ActualFactNum = (((ExperimentPoint)vals[0]).xs.size() - countSign);
+        for(int k = 0; k <  _experimentTable->x().count(); k++)
+        {
+            QString s2 = QString::number(k);
+            if(s==s2)
+                c++;
+        }
 
 
-        for(int i = 0; i < src->FactNum; i++)
-            v.push_back(_experimentTable->x().xCenter((int)i));
+    }
+/*
+    if(c == _experimentTable->x().count())
+    {
+        QMessageBox msg;
+        msg.setText("все линейные посчитаны");
+        msg.setWindowTitle("Предупреждение");
+        msg.setSizeGripEnabled(true);
+        msg.exec();
+    }*/
+    if(c == _experimentTable->x().count())
+    {
+        //для проверки это формульный эксперимент или нет
+        std::vector<int> xxx;
+        for(int i = 0; i < _experimentTable->x().count(); i++)
+        {
+            xxx.push_back(1);
+        }
 
-        src->FactValues = vals.at(vals.size() - 1).xs;
-        _dataSrc = src;
-        _view->updateInputs(*_experimentTable);
+        std::vector<double> yyy = _dataSrc->getYdata(xxx);
 
-        this->newModellGrad(CfindExtrDialog.isFormulaExperiment);
+        findExtrDialog CfindExtrDialog;
+
+        //если не производится расчет по формуле, то это не формульный эксперимент
+        if(yyy.size()==0)
+            CfindExtrDialog.isFormulaExperiment = false;
+        else
+           CfindExtrDialog.isFormulaExperiment = true;
+
+        CfindExtrDialog.startfindExtr(*_experimentTable, *_dataSrc);
+
+
+        IExperimentTable * exTable = NULL;
+        exTable = ExperimentTable::createExperimentTable(CentralOrtogonalComposite, _dataSrc->inputsCount(), _dataSrc->actualInputsCount(), _interactionLevel);
+        ExperimentDialog * exDialog = new ExperimentDialog();
+
+       // CHECK CALC EXTREMUM
+
+        _view->readData(_experimentTable);
+
+        std::vector<ExperimentPoint> vals = CfindExtrDialog.v;
+
+        bool isExtremeumFound = CfindExtrDialog.isExtremFound;
+
+        //assert(vals.at(vals.size() - 1).xs.size() == (size_t)_experimentTable->x().count()); // xs[0] is f
+
+        if((CfindExtrDialog.ccp==true)&&(CfindExtrDialog.exper==false))
+        {
+            _view->updateGr(*_experimentTable, vals); // + isExtremeumFound
+
+            exDialog->startDialog("ЦКП", exTable, _experimentTable, _interactionLevel);
+        }
+
+
+
+        std::vector<ExperimentPoint> vals2 = vals;
+        vals.clear();
+        for(int i = 0; i < vals2.size(); i++)
+        {
+           ExperimentPoint P = vals2[i];
+           std::vector<double> va;
+           for(int j = 0; j < P.xs.size(); j++)
+           {
+             //  remove(P.xs.begin(), P.xs.end(), 0 );
+               //if(P.xs[j]!=0)
+               std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
+               if (bCoefs[j+1].is_significant())
+               {
+                   va.push_back(P.xs[j]);
+               }
+           }
+           P.xs.clear();
+           P.xs = va;
+           vals.clear();
+           vals.push_back(P);
+        }
+
+        if ((CfindExtrDialog.exper == true)&&(CfindExtrDialog.ccp == false))
+        {
+            _modelHasData = true;
+
+            int pos=0;
+            int xspos=0;
+            _view->updateGr(*_experimentTable, vals);
+
+            int countSign = 0;
+
+            int countIsSign = 0;
+            /*
+            for(int i = 0; i < _experimentTable->x().count(); i++)
+            {
+                std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
+                if (bCoefs[i+1].is_significant())
+                {
+                    countIsSign++;
+                }
+             }
+
+            for(int i = 0; i < ((ExperimentPoint)vals[i]).xs.size(); i++)
+            {
+                std::vector<bCoeff> bCoefs = _experimentTable->b().coeffs();
+                //if (((ExperimentPoint)vals.at(0)).xs.at(xspos)!= 0)
+                if (bCoefs[i+1].is_significant())
+                {
+                    _experimentTable->x().setXcenter(pos, vals.at(vals.size() - 1).xs.at(xspos));
+                    pos++;
+                }
+                else
+                {
+                    countSign++;
+                }
+                xspos++;
+
+            }
+*/
+            ResponcesSourseFunction *src = new ResponcesSourseFunction((ResponcesSourseFunction&)*_dataSrc);
+            std::vector<double> v;
+
+            src->FactNum = (((ExperimentPoint)vals[0]).xs.size() - countSign);
+            src->ActualFactNum = (((ExperimentPoint)vals[0]).xs.size() - countSign);
+            std::vector<double> _FactDivergences;
+           /* _FactDivergences.push_back(0.5);
+            _FactDivergences.push_back(0.5);
+            _FactDivergences.push_back(0.5);*/
+            for(int i = 0; i < ((ExperimentPoint)vals[0]).xs.size(); i++)
+            {
+                _FactDivergences.push_back(CfindExtrDialog._FactDivergences);
+            }
+            src->FactDivergences = _FactDivergences;
+
+
+
+            for(int i = 0; i < src->FactNum; i++)
+                v.push_back(_experimentTable->x().xCenter((int)i));
+
+            src->FactValues = vals.at(vals.size() - 1).xs;
+            _dataSrc = src;
+            _view->updateInputs(*_experimentTable);
+
+            this->newModellGrad(CfindExtrDialog.isFormulaExperiment);
+        }
+    }
+    else
+    {
+        QMessageBox msg;
+        msg.setText("Найдены не все линейные коэффициенты");
+        msg.setWindowTitle("Предупреждение");
+        msg.setSizeGripEnabled(true);
+        msg.exec();
     }
 }
 
@@ -1126,4 +1202,11 @@ void UiController::CCP()
     exTable = ExperimentTable::createExperimentTable(CentralOrtogonalComposite, _dataSrc->inputsCount(), _dataSrc->actualInputsCount(), _interactionLevel);
     ExperimentDialog * exDialog = new ExperimentDialog();
     exDialog->startDialog("ЦКП", exTable, _experimentTable, _interactionLevel);
+}
+
+void UiController::ChSaveFolderPath()
+{
+    SaveDirectoryPathDialog * saveDialog = new SaveDirectoryPathDialog();
+    saveDialog->show();
+
 }

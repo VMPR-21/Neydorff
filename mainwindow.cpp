@@ -49,8 +49,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _actualInputs = 0; //actual x
     _inputs = 0;
     gg = 0; //счётчик
+
     control = new UiController(this);
-    control->newModel(true);
+
+    //control->newModel(true);
 
     createActions();
     createMenu();
@@ -126,15 +128,24 @@ ui->pushButton_MAX->hide();
         }
         case 0:
         {
-            res= control->newModel();
+            res= control->newModel(MATHMODEL);
+            this->ui->findExtrButton_3->setEnabled(false);
+            ModelType=MATHMODEL;
             break;
         }
         case 1:
         {
-            res=loadToFile();
+            res= control->newModel(EXTRSEARCH);
+            this->ui->findExtrButton_3->setEnabled(true);
+            ModelType= EXTRSEARCH;
             break;
         }
         case 2:
+        {
+            res=loadToFile();
+            break;
+        }
+        case 3:
         {
             res=NewExperimenLoadfromCSV();
             break;
@@ -213,9 +224,13 @@ void MainWindow::createActions()
 //    openFromCSVActions->setShortcut(tr("Ctrl+O"));
     connect(openFromCSVActions, SIGNAL(triggered()), this, SLOT(loadFromCSV()));
 
-    newActions = new QAction(("&Новый эксперимент"), this);
+    newActions = new QAction(("&Новый эксперимент.Моделирование"), this);
     newActions->setShortcut(tr("Ctrl+N"));
     connect(newActions, SIGNAL(triggered()), this, SLOT(nModel()));
+
+    newActionsE = new QAction(("&Новый эксперимент.Поиск экстремума"), this);
+    newActionsE->setShortcut(tr("Ctrl+E"));
+    connect(newActionsE, SIGNAL(triggered()), this, SLOT(nModelExtr()));
 
     /*
     newActionsF = new QAction(("&Новый эксперимент(формула)"), this);
@@ -223,8 +238,12 @@ void MainWindow::createActions()
     connect(newActionsF, SIGNAL(triggered()), this, SLOT(nModelFormula()));
     */
 
-    paramsAction = new QAction(("&Исходные настройки"), this);
+    paramsAction = new QAction(("&Исходные настройки эксперимента"), this);
     connect(paramsAction, SIGNAL(triggered()), this, SLOT(chModelParams()));
+
+    savepathAction = new QAction(("&Расположение сохраняемых данных"), this);
+    connect(savepathAction, SIGNAL(triggered()), this, SLOT(ChFileFolder()));
+
 
     formatChisAction = new QAction(("&Формат числа"), this);
     connect(formatChisAction, SIGNAL(triggered()), this, SLOT(chNumberFormater()));
@@ -254,6 +273,7 @@ void MainWindow::createMenu()
 {
     fileMenu = menuBar()->addMenu("&Файл");
     fileMenu->addAction(newActions);
+    fileMenu->addAction(newActionsE);
     fileMenu->addAction(openActions);
     fileMenu->addAction(saveActions);
     fileMenu->addAction(openFromCSVActions);
@@ -269,6 +289,7 @@ void MainWindow::createMenu()
 
     optionMenu = menuBar()->addMenu("&Опции");
     optionMenu->addAction(paramsAction);
+    optionMenu->addAction(savepathAction);
     //optionMenu->addAction(colaSettingsAction);
 
     helpMenu = menuBar()->addMenu("&Справка");
@@ -858,7 +879,11 @@ void MainWindow::on_pushButton_2_clicked()   //stolbec -
 void MainWindow::saveToFile()
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), "", ("Table (*.a_s);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_A_S").toString();
+
+    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), path, ("Table (*.a_s);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
     control->saveModel(fileName);
 }
 
@@ -866,7 +891,11 @@ void MainWindow::saveToFile()
 void MainWindow::saveToCSV()
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_CSV").toString();
+
+    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), path /*"new_experiment.csv"*/, ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
     control->saveModel(fileName);
 }
 
@@ -875,7 +904,10 @@ void MainWindow::saveToCSV()
 bool MainWindow::loadToFile()
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getOpenFileName(this, ("Открыть"), "", ("Table (*.a_s);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_A_S").toString();
+    QString fileName = QFileDialog::getOpenFileName(this, ("Открыть"), path, ("Table (*.a_s);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
    return control->loadModel(fileName);
 }
 
@@ -884,14 +916,21 @@ bool MainWindow::loadToFile()
 bool MainWindow::loadFromCSV()
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getOpenFileName(this, ("Открыть"), "", ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_CSV").toString();
+
+    QString fileName = QFileDialog::getOpenFileName(this, ("Открыть"), path, ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
    return control->NewExperimenLoadfromCSV(fileName);
 }
 
 bool MainWindow::NewExperimenLoadfromCSV()
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getOpenFileName(this, ("Импорт из CSV"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_CSV").toString();
+    QString fileName = QFileDialog::getOpenFileName(this, ("Импорт из CSV"), path, ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
    return control->NewExperimenLoadfromCSV(fileName);
 }
 
@@ -901,6 +940,10 @@ void MainWindow::chModelParams()   //parametri
         control->dataChanged();
 
     control->changeModelParams();
+
+    bool res=ModelType==1? false:true;
+    this->ui->findExtrButton_3->setEnabled(res);
+
 
 }
 
@@ -912,39 +955,53 @@ void MainWindow::nModel()  //new experement
 {
     _dataChanged = false;
     this->hide();
-    control->newModel(false);
+    control->newModel(1,false);
     gg = ui->tableWidget->columnCount() - _inputs;
     ui->tableWidgetY->clear();
     ui->tableWidgetB->clear();
     ui->listWidget_4->clear();
     ui->lineEdit->clear();
     ui->lineEdit_2->clear();
+    ui->findExtrButton_3->setEnabled(false);
     this->show();
 }
 
-void MainWindow::nModelFormula()
+void MainWindow::nModelExtr()
 {
     _dataChanged = false;
-    control->newModel(false, true);
+    control->newModel(2,false, true);
     gg = ui->tableWidget->columnCount() - _inputs;
     ui->tableWidgetY->clear();
     ui->tableWidgetB->clear();
     ui->listWidget_4->clear();
     ui->lineEdit->clear();
     ui->lineEdit_2->clear();
+    ui->findExtrButton_3->setEnabled(true);
+    this->show();
+}
+
+void MainWindow::ChFileFolder()
+{
+        control->ChSaveFolderPath();
 }
 
 void MainWindow::on_pushButton_3_clicked()  //load
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getOpenFileName(this, ("Load"), "", ("Table (*.a_s);;All Files(*)"));
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_A_S").toString();
+    QString fileName = QFileDialog::getOpenFileName(this, ("Load"), path, ("Table (*.a_s);;All Files(*)"));
     control->loadModel(fileName);
 }
 
 void MainWindow::on_pushButton_4_clicked() //save
 {
     _dataChanged = false;
-    QString fileName = QFileDialog::getSaveFileName(this, ("Save"), "", ("Table (*.a_s);;All Files(*)"));
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_A_S").toString();
+    QString fileName = QFileDialog::getSaveFileName(this, ("Save"), path, ("Table (*.a_s);;All Files(*)"));
     control->saveModel(fileName);
 }
 

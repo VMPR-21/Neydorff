@@ -32,18 +32,29 @@ int startWindow::showStartMenu()
 
 void startWindow::on_clbNewExperiment_clicked()
 {
-    ActionNumber=0;
-    close();
+
 }
 
 void startWindow::on_clbOpenExperiment_clicked()
 {
-    ActionNumber=1;
+    ActionNumber=2;
     close();
 }
 
 void startWindow::on_clbImportFromCSV_clicked()
 {
-    ActionNumber=2;
+    ActionNumber=3;
+    close();
+}
+
+void startWindow::on_clbNewExperimentModeling_clicked()
+{
+    ActionNumber=0;
+    close();
+}
+
+void startWindow::on_clbNewExperimentExtrFind_clicked()
+{
+    ActionNumber=1;
     close();
 }

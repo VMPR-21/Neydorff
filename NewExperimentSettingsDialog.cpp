@@ -8,19 +8,32 @@ static double log2(double n) //log2() is not supported by MSVC
 }
 #endif
 
-NewExperimentSettingsDialog::NewExperimentSettingsDialog(IResponcesSource *pDataSource, int _interaction_level, int _paral, QWidget *parent):
-    QDialog(parent),ui(new Ui::NewExperimentSettingsDialog),_interaction_level(_interaction_level),_paral(_paral)
+
+
+NewExperimentSettingsDialog::NewExperimentSettingsDialog(short ModelType,IResponcesSource *pDataSource, int _interaction_level, int _paral, QWidget *parent):
+    _modelType(ModelType),QDialog(parent),ui(new Ui::NewExperimentSettingsDialog),_interaction_level(_interaction_level),_paral(_paral)
 {
 
     ui->setupUi(this);
 
 
+    if (ModelType ==MATHMODEL)
+    {
+        ui->spinBox_interactionLevel->show();
+        ui->label_8->show();
+    }
+    else
+    {
+        ui->spinBox_interactionLevel->hide();
+        ui->label_8->hide();
+    }
 
     isFormulaReferense=true;
     ui->rbtnGetYFromFunction->setChecked(true);
     ui->DrobRepl_horizontalSlider->setMinimum(2);
     ui->DrobRepl_horizontalSlider->setMaximum(3);
     ui->DrobRepl_horizontalSlider->setValue(1);
+
 
 
     if(pDataSource != NULL)
@@ -454,7 +467,7 @@ void NewExperimentSettingsDialog::on_DrobRepl_horizontalSlider_valueChanged(int 
 
 void NewExperimentSettingsDialog::on_pushButton_clicked()
 {
-     savedata=true;
+
     if (this->isFormulaReferense)
     {
         FormulaCheck();
@@ -467,8 +480,12 @@ void NewExperimentSettingsDialog::on_pushButton_clicked()
             return;
         }
 
-        if (saveFactValues())
+        bool res=saveFactValues();
+        if (res)
+        {
+            savedata=true;
             close();
+        }
     }
 }
 
@@ -511,28 +528,43 @@ void NewExperimentSettingsDialog::on_tableWidget_Znach_cellChanged(int row, int 
     if(auto_check)
         switch(column)
         {
-        case 1:
+        case FACT_NAME_COLUMN: // псевдоним
         {
             QString FactorName= ui->tableWidget_Znach->item(row,1)->text();
             SetFactorInfo(row,FactorName,0,1);
             break;
         }
-
-        case 2:
+        case FACT_CENTER_COLUMN: // центр фактора
             onCenterChanged(row, column);
             break;
 
-        case 3:
+        case FACT_DIAPAZON_COLUMN: // диапазон выррирования
+        {
+            ui->tableWidget_Znach->blockSignals(true);
+            double diapazon=ui->tableWidget_Znach->item(row,FACT_DIAPAZON_COLUMN)->text().toDouble();
+            ui->tableWidget_Znach->item(row,FACT_INTERVAL_COLUMN)->setText(QString::number(diapazon/2.));
+            ui->tableWidget_Znach->blockSignals(false);
             onCenterChanged(row, column - 1);
             break;
+        }
 
-        case 4:
+        case FACT_MIN_COLUMN: // минимальное значение
             onMinMaxChanged(row, column + 1);
             break;
 
-        case 5:
+        case FACT_MAX_COLUMN: // максимальное
             onMinMaxChanged(row, column);
             break;
+        case FACT_INTERVAL_COLUMN:
+        {
+            ui->tableWidget_Znach->blockSignals(true);
+            double interval=ui->tableWidget_Znach->item(row,FACT_INTERVAL_COLUMN)->text().toDouble();
+            ui->tableWidget_Znach->item(row,FACT_DIAPAZON_COLUMN)->setText(QString::number(interval*2.));
+            ui->tableWidget_Znach->blockSignals(false);
+            onCenterChanged(row, FACT_DIAPAZON_COLUMN - 1);
+
+            break;
+        }
         }
 }
 
@@ -576,6 +608,8 @@ void NewExperimentSettingsDialog::init()
     labels.append(QString::fromUtf8("Диапазон\nварьирования"));
     labels.append(QString::fromUtf8("Минимальное\nзначение"));
     labels.append(QString::fromUtf8("Максимальное\nзначение"));
+    labels.append(QString::fromUtf8("Интервал\nварьирования"));
+
 
     ui->tableWidget_Znach->setHorizontalHeaderLabels(labels);
     ui->tableWidget_Znach->resizeColumnsToContents();
@@ -595,6 +629,7 @@ bool NewExperimentSettingsDialog::askNewSettings()
     this->exec();
 
     return savedata;
+
     if (canceled)
         return false;
     else
@@ -603,13 +638,11 @@ bool NewExperimentSettingsDialog::askNewSettings()
 
 bool NewExperimentSettingsDialog::saveFactValues()
 {
-    if (ui->FactNum_spinBox->value()<1)
-        return false;
+
     canceled=false;
 
     bool r = true;
-    data.FactValues.clear();
-    data.FactDivergences.clear();
+
     data.EvaluateFunction.clear();
 
 
@@ -633,6 +666,13 @@ bool NewExperimentSettingsDialog::saveFactValues()
         data.parall=(double) paral;
         data.SetEvaluateFunction("","");
     }
+
+    if (ui->FactNum_spinBox->value()<1)
+        return false;
+
+    data.FactValues.clear();
+    data.FactDivergences.clear();
+
     data.DrobRepl =(double)ui->DrobRepl_horizontalSlider->value();
 
 
@@ -670,6 +710,7 @@ bool NewExperimentSettingsDialog::saveFactValues()
     {
         data.Descriptions.append(ui->tableWidget_Znach->item(i, 1)->text());
     }
+    savedata=true;
     return r;
 }
 
@@ -694,11 +735,12 @@ void NewExperimentSettingsDialog::updateTables()
                center=GetFactorInfo(i).Center;
                interval=GetFactorInfo(i).Interval;
             }
-            ui->tableWidget_Znach->setItem(i, 2, new QTableWidgetItem(QString::number(center)));
-            ui->tableWidget_Znach->setItem(i, 3, new QTableWidgetItem(QString::number(interval)));
-            ui->tableWidget_Znach->setItem(i, 4, new QTableWidgetItem(QString::number(center-interval/2)));
-            ui->tableWidget_Znach->setItem(i, 5, new QTableWidgetItem(QString::number(center+interval/2)));
-             ui->tableWidget_Znach->setItem(i, 1, new QTableWidgetItem(name));
+            ui->tableWidget_Znach->setItem(i, FACT_CENTER_COLUMN, new QTableWidgetItem(QString::number(center)));
+            ui->tableWidget_Znach->setItem(i, FACT_DIAPAZON_COLUMN, new QTableWidgetItem(QString::number(interval)));
+            ui->tableWidget_Znach->setItem(i, FACT_INTERVAL_COLUMN, new QTableWidgetItem(QString::number(interval/2.)));
+            ui->tableWidget_Znach->setItem(i, FACT_MIN_COLUMN, new QTableWidgetItem(QString::number(center-interval/2.)));
+            ui->tableWidget_Znach->setItem(i, FACT_MAX_COLUMN, new QTableWidgetItem(QString::number(center+interval/2.)));
+             ui->tableWidget_Znach->setItem(i, FACT_NAME_COLUMN, new QTableWidgetItem(name));
 
             ui->tableWidget_Znach->setItem(i, 0, new QTableWidgetItem(QString::number(i + 1)));
             ui->tableWidget_Znach->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -766,11 +808,12 @@ void NewExperimentSettingsDialog::onMinMaxChanged(int row, int col)
     max = ui->tableWidget_Znach->item(row, col)->text().toDouble();
     min = ui->tableWidget_Znach->item(row, col - 1)->text().toDouble();
     interval = max - min;
-    center = max - interval / 2;
+    center = max - interval / 2.;
 
     auto_check = false;
     ui->tableWidget_Znach->item(row, 2)->setText(QString::number(center));
-    ui->tableWidget_Znach->item(row, 3)->setText(QString::number(interval));
+    ui->tableWidget_Znach->item(row, FACT_DIAPAZON_COLUMN)->setText(QString::number(interval));
+    ui->tableWidget_Znach->item(row, FACT_INTERVAL_COLUMN)->setText(QString::number(interval/2.));
     auto_check = true;
 
     QString FactorName= ui->tableWidget_Znach->item(row,1)->text();
@@ -779,7 +822,7 @@ void NewExperimentSettingsDialog::onMinMaxChanged(int row, int col)
 
 void NewExperimentSettingsDialog::onCenterChanged(int row, int col)
 {
-    //хоть называется и onCenter, на самом деле отвечает и за центр и за интервал
+    //хоть называется и onCenter, на самом деле отвечает и за центр и за диапазон
     double interval, max, min, center;
     interval = ui->tableWidget_Znach->item(row, col + 1)->text().toDouble();
     center = ui->tableWidget_Znach->item(row, col)->text().toDouble();
@@ -951,19 +994,46 @@ void NewExperimentSettingsDialog::on_rbtnGetYFromNatur_toggled(bool checked)
 void NewExperimentSettingsDialog::on_saveFormula_clicked()
 {
     QString message=QString::fromUtf8("Во время сохранения файла возникли ошибки,проверьте введённые параметры и повторите попытку");
-    QString FileName=QFileDialog::getSaveFileName(this, ("Сохранить"), "", ("Table (*.xml);;All Files(*)"));
-    if (FileName!="" && ui->tFormulaInput->toPlainText()!="")
-    {        
-        if (saveFactValues())
+    QString FileName="";
+
+ /*
+    if (ui->tFormulaInput->toPlainText()=="")
+    {
+        message =QString::fromUtf8("Отсутствует формула");
+        QMessageBox msg;
+        msg.setText(message);
+        msg.setWindowTitle(" ");
+        msg.setSizeGripEnabled(true);
+        msg.exec();
+
+    }
+    else
+    */
+
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_XML").toString();
+
+
+        FileName=QFileDialog::getSaveFileName(this, ("Сохранить"), path, ("Table (*.xml);;All Files(*)"));
+    if (FileName!="")// && ui->tFormulaInput->toPlainText()!="")
+    {
+
+        if (saveFactValues())//&& this->ui->tFormulaInput->toPlainText()!="")
         {
+
             if (this->data.SaveFormula(FileName))
             {
                 message =QString::fromUtf8("Файл успешно сохранён");
             }
         }
+        else
+        {
+            message =QString::fromUtf8("Отстутствуют данные для сохранения");
+        }
     }
     if (FileName!="")
-    {
+    {        
         QMessageBox msg;
         msg.setText(message);
         msg.setWindowTitle(" ");
@@ -973,8 +1043,13 @@ void NewExperimentSettingsDialog::on_saveFormula_clicked()
 }
 
 void NewExperimentSettingsDialog::on_loadFormula_clicked()
-{    
-    QString FileName=QFileDialog::getOpenFileName(this, ("Сохранить"), "", ("Table (*.xml);;All Files(*)"));
+{
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_XML").toString();
+
+
+    QString FileName=QFileDialog::getOpenFileName(this, ("Сохранить"), path, ("Table (*.xml);;All Files(*)"));
     if (FileName!="")
     {
         if(this->data.LoadFormula(FileName))

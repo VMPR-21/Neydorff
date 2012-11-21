@@ -300,6 +300,9 @@ bool ResponcesSourseFunction::LoadFormula(QString FileName)
 
 bool ResponcesSourseFunction::SaveFormula(QString FileName)
 {
+    if (this->EvaluateFunction.length() <=0 && this->FactNum <=0)
+        return false;
+
     QXmlStreamWriter xml;
     QFile file(FileName);
     if (file.open(QIODevice::ReadWrite))
@@ -313,6 +316,8 @@ bool ResponcesSourseFunction::SaveFormula(QString FileName)
     xml.setAutoFormatting(true);
     xml.writeStartDocument();
     xml.writeStartElement("settings");
+    if (this->EvaluateFunction.length()>0)
+    {
         xml.writeStartElement("formula");
             xml.writeTextElement("text",this->EvaluateFunction.at(0));
             if (EvaluateFunction.at(1).contains("/*degrees*/"))
@@ -321,8 +326,12 @@ bool ResponcesSourseFunction::SaveFormula(QString FileName)
             }
             xml.writeTextElement("corner",corner_metric);
         xml.writeEndElement(); //formula
+    }
 
-        xml.writeStartElement("factors");
+        if (this->FactNum>0)
+        {
+            xml.writeStartElement("factors");
+
         for (int i=0;i<this->FactNum;i++)
         {
             xml.writeStartElement("x"+QString::number(i+1));
@@ -331,6 +340,7 @@ bool ResponcesSourseFunction::SaveFormula(QString FileName)
             xml.writeEndElement();
         }
         xml.writeEndElement(); //factors
+        }
     xml.writeEndElement(); //settings
     xml.writeEndDocument();
     return true;

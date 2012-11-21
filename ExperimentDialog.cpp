@@ -877,7 +877,7 @@ void ExperimentDialog::calcExtremum(bool isMax)
 
 void ExperimentDialog::changeModelParams()
 {
-    IModelSettingsView *settings = new NewExperimentSettingsDialog(_dataSrc);
+    IModelSettingsView *settings = new NewExperimentSettingsDialog(1,_dataSrc);
     settings->askNewSettings();
     bool saveData = _dataSrc != NULL;
     int oldInputsCount = -1, oldActualInputsCount = -1;

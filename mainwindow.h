@@ -87,8 +87,9 @@ private slots:
     bool NewExperimenLoadfromCSV(); //
     void chModelParams(); //parametri
     void chNumberFormater();//format chisla
-    void nModel(); //new experement
-    void nModelFormula();
+    void nModel(); //new experement modeling
+    void nModelExtr(); //new experiment extr
+    void ChFileFolder();//изменить расположение файлов сохраниеия
     void testExperimentTableSlotMax();
     void testExperimentTableSlotMin();
     void testSomeProcessSlot();
@@ -135,6 +136,8 @@ private:
     double _h;
     int _ch;
     int _dev;
+
+    short ModelType;
 
 
 
@@ -188,8 +191,9 @@ private:
     QAction *openFromCSVActions;
     QAction *saveToCSVActions;
     QAction *paramsAction;
+    QAction *savepathAction;
     QAction *newActions;
-    QAction *newActionsF;
+    QAction *newActionsE;
     QAction *colaSettingsAction;
 
     QAction *formatChisAction;

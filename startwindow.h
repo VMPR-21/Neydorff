@@ -24,6 +24,10 @@ private slots:
 
     void on_clbImportFromCSV_clicked();
 
+    void on_clbNewExperimentModeling_clicked();
+
+    void on_clbNewExperimentExtrFind_clicked();
+
 private:
     Ui::startWindow *ui;
     int ActionNumber;

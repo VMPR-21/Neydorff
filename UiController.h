@@ -15,8 +15,10 @@ class IExperimentTable;
 //Класс-контроллер для обеспечения взаимодействия между GUI и внутренними объектами.
 class UiController : public IUiController
 {
+private:
     bool _modelHasData;
     bool _isFormulaModel;
+    short _ModelType;
     IResponcesSource *_dataSrc;
     INumberFormatView *_formatterView;
     INumberFormatter *_formatter;
@@ -45,8 +47,12 @@ public:
     void startProcess(bool max, double _h, int _ch, int _dev);
     void CCP();
 
+
+
     //Реализация IUiController
-    bool newModel(bool createEmpty = false, bool isFormulaModel = false);
+    bool newModel(short ModelType =MATHMODEL ,bool createEmpty = false, bool isFormulaModel = false);
+    //bool newModel(bool createEmpty = false, bool isFormulaModel = false);
+
     //void newModel(bool createEmpty = false, bool isFormulaModel = false);
     bool NewExperimenLoadfromCSV(const QString &fileName);
 
@@ -79,6 +85,7 @@ public:
     //void changeModelParams();
     bool changeModelParams();
 
+
     void changeModelParamsGrad();
 
     void dataChanged();
@@ -88,6 +95,8 @@ public:
     void changeBcoefSignificance(int row);
 
     void findExtr();
+
+    void ChSaveFolderPath();
 };
 
 #endif // UICONTROLLER_H

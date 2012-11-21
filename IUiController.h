@@ -5,6 +5,9 @@
 #include "ICriteria.h"
 #include "IExperimentTable.h"
 
+#define MATHMODEL 1
+#define EXTRSEARCH 2
+
 class INumberFormatter;
 
 //Абстрактный класс контроллера, которому отправляются команды от интерфейса пользователя(IView)
@@ -13,7 +16,8 @@ class IUiController
 public:
 
     //создать новую модель
-    virtual bool newModel(bool createEmpty = false, bool isFormulaModel = false) = 0;
+    virtual bool newModel(short ModelType =MATHMODEL ,bool createEmpty = false, bool isFormulaModel = false) =0;
+
     //virtual void newModel(bool createEmpty = false, bool isFormulaModel = false) = 0;
 
     //создать новую модель
@@ -85,6 +89,8 @@ public:
     virtual void CCP() = 0;
 
     virtual void findExtr() = 0;
+
+    virtual void ChSaveFolderPath()=0;
 };
 
 #endif // IUICONTROLLER_H
