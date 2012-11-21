@@ -11,7 +11,6 @@
 #include "QModelIndex"
 #include "mainwindow.h"
 #include <QtGui>
-#include <QSettings>
 
 findExtrDialog::findExtrDialog(QWidget *parent) :
     QDialog(parent),
@@ -61,17 +60,20 @@ void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &sr
     ui->spinBox_2->setValue(dev);
 
 
-
-
+    if(ui->radioButton->isChecked()) isMax = true;
+        else isMax = false;
+    h = ui->doubleSpinBox->value();
+    ch = ui->spinBox_3->value();
+    dev = ui->spinBox_2->value();
 
     std::vector<bCoeff> bCoefs = table.b().coeffs();
 
-    ui->tableWidget->setColumnCount(table.b().count());
+    ui->tableWidget->setColumnCount(table.x().count()+1);
     ui->tableWidget->setRowCount(1);
     ui->tableWidget->verticalHeader()->hide();
 
     QStringList lst;
-    for(int i = 0; i < table.b().count(); i++)
+    for(int i = 0; i < table.x().count()+1; i++)
     {
         lst << "β" + QString::number(i);
     }
@@ -81,7 +83,7 @@ void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &sr
         ui->tableWidget->setHorizontalHeaderItem(i, new QTableWidgetItem(lst[i]));
     }
 
-    for(int i = 0; i < table.b().count(); i++)
+    for(int i = 0; i < table.x().count()+1; i++)
     {
         ui->tableWidget->setColumnWidth(i,65);
         //double xi = bCoefs[i].is_significant() ? bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0) : 0.0;
@@ -105,13 +107,13 @@ void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &sr
     grad.clear();
 
     //перепишем b натуральные в градиент, при этом если незначим, то 0
-    for(int i = 1; i < table.b().count(); i++)
+    for(int i = 1; i < table.x().count(); i++)
     {
         //double xi = bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0);
         double xi = bCoefs[i].is_significant() ? bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0) : 0.0;
         grad.push_back(xi);
     }
-
+/*
     ui->tableWidget_2->setColumnCount(table.b().count()+7);
     ui->tableWidget_2->setRowCount(ch);
     ui->tableWidget_2->verticalHeader()->hide();
@@ -250,7 +252,7 @@ void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &sr
         xxx.push_back(5.5);
         std::vector<double> yyy = src.getYdata2(xxx);
 */
-
+/*
         std::vector<double> yy = src.getYdata2(P.xs);
         int xsize = yy.size();
         if (yy.size()!=0)
@@ -322,15 +324,15 @@ void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &sr
             item->setFlags(item->flags()& ~Qt::ItemIsEditable);//read only
             ui->tableWidget_2->setItem(i, grad.size()+7, item);
         }
-
+*/
 
 
 
         //-------------------------------------------------------------------------------
-    }
+   // }
 
     //double xxxxxxyy = ((ExperimentPoint)v[0]).yp;
-    if(isFormulaExperiment)
+ /*   if(isFormulaExperiment)
     {
         for(int i = 0; i < ch; i++)
         {
@@ -340,11 +342,11 @@ void findExtrDialog::startfindExtr(IExperimentTable &table, IResponcesSource &sr
     }
     ui->label_5->setText("");
     ui->label_6->setText("");
-    this->initial = true;
+    this->initial = true;*/
 
 
-    restartfindExtr();
-    ui->tableWidget_2->clear();
+   // restartfindExtr();
+ //   ui->tableWidget_2->clear();
     this->exec();
 
 }
@@ -385,18 +387,16 @@ void findExtrDialog::restartfindExtr()
     dev = table->getInterestAllowedDeviation();
     ui->spinBox_2->setValue(dev);
 
-
-
     std::vector<bCoeff> bCoefs = this->table->b().coeffs();
 
 
     ui->tableWidget->clear();
-    ui->tableWidget->setColumnCount( this->table->b().count());
+    ui->tableWidget->setColumnCount( this->table->x().count()+1);
     ui->tableWidget->setRowCount(1);
     ui->tableWidget->verticalHeader()->hide();
 
     QStringList lst;
-    for(int i = 0; i <  this->table->b().count(); i++)
+    for(int i = 0; i <  this->table->x().count()+1; i++)
     {
         lst << "β" + QString::number(i);
     }
@@ -406,7 +406,7 @@ void findExtrDialog::restartfindExtr()
         ui->tableWidget->setHorizontalHeaderItem(i, new QTableWidgetItem(lst[i]));
     }
 
-    for(int i = 0; i < this->table->b().count(); i++)
+    for(int i = 0; i < this->table->x().count()+1; i++)
     {
         ui->tableWidget->setColumnWidth(i,65);
         //double xi = bCoefs[i].is_significant() ? bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0) : 0.0;
@@ -427,7 +427,7 @@ void findExtrDialog::restartfindExtr()
     grad.clear();
 
     //перепишем b натуральные в градиент, при этом если незначим, то 0
-    for(int i = 1; i < this->table->b().count(); i++)
+    for(int i = 1; i < this->table->x().count()+1; i++)
     {
         //double xi = bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0);
         double xi = bCoefs[i].is_significant() ? bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0) : 0.0;
@@ -448,7 +448,7 @@ void findExtrDialog::restartfindExtr()
     ui->tableWidget_2->clear();
     ui->tableWidget_2->setColumnCount(0);
     ui->tableWidget_2->setRowCount(0);
-    ui->tableWidget_2->setColumnCount( this->table->b().count()+7);
+    ui->tableWidget_2->setColumnCount( this->table->x().count()+8);
     ui->tableWidget_2->setRowCount(ch);
     ui->tableWidget_2->verticalHeader()->hide();
 
@@ -461,7 +461,7 @@ void findExtrDialog::restartfindExtr()
     lst << "Ygrad";
     lst << "Yreal";
     lst << "Ygrad-Yreal";
-    lst << "Знак";
+    lst << "Направ-\nление";
 
     lst << "Приращение\n по шагу";
     lst << "Ускорение или\n замедление\n движения к extr";
@@ -483,7 +483,7 @@ void findExtrDialog::restartfindExtr()
     ui->tableWidget_2->setColumnWidth(lst.size()-2,90);
     ui->tableWidget_2->setColumnWidth(lst.size()-3,80);
 
-    ui->tableWidget_2->setColumnWidth(lst.size()-4,42);
+    ui->tableWidget_2->setColumnWidth(lst.size()-4,53);
     ui->tableWidget_2->setColumnWidth(lst.size()-5,70);
     ui->tableWidget_2->setColumnWidth(lst.size()-6,60);
     ui->tableWidget_2->setColumnWidth(lst.size()-7,60);
@@ -491,7 +491,7 @@ void findExtrDialog::restartfindExtr()
     grad.clear();
 
     //перепишем b натуральные в градиент, при этом если незначим, то 0
-    for(int i = 1; i < this->table->b().count(); i++)
+    for(int i = 1; i < this->table->x().count()+1; i++)
     {
         double xi = bCoefs[i].is_significant() ? bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0) : 0.0;
         grad.push_back(xi);
@@ -648,54 +648,141 @@ void findExtrDialog::restartfindExtr()
             item->setFlags(item->flags()& ~Qt::ItemIsEditable);//read only
             ui->tableWidget_2->setItem(i, grad.size()+7, item);
         }
+
+        {
+            QString s = "";
+            QTableWidgetItem *item = new QTableWidgetItem(s);
+            item->setFlags(item->flags()& ~Qt::ItemIsEditable);//read only
+            ui->tableWidget_2->setItem(i, grad.size()+8, item);
+        }
     }
 
     this->initial = true;
     ui->label_4->setText("");
 
+
     ui->label_5->setText("");
 
+    /*//можно будет убрать когда нибудь
     if(this->xP_find)
         ui->label_5->setText("Шаг на котором вышли за пределы эксперимента " + QString::number(this->xP+1));
     else
         ui->label_5->setText("Не вышли за пределы эксперимента");
-
+    */
 /*
-    std::vector<bool> znakPol;
+    std::vector<int> znakPol;
     P = v[0];
     for (int j = 0; j < P.xs.size(); j++)
     {
-        if(P.xs[j]>=0)
+        if(P.xs[j]>0)
         {
-            znakPol.push_back(true);
+            znakPol.push_back(1);
         }
-        else
+        if(P.xs[j]<0)
         {
-             znakPol.push_back(false);
+             znakPol.push_back(-1);
+        }
+        if(P.xs[j]==0)
+        {
+            znakPol.push_back(0);
         }
     }
     QString s = "";
+    bool exit = false;
+    bool exit2 = false;
+    for (int i = 1; i < v.size(); i++)
+    {
+        std::vector<int> znakPol2;
+        P = v[i];
+        for (int j = 0; j < P.xs.size(); j++)
+        {
+            if(P.xs[j]>0)
+            {
+                znakPol2.push_back(1);
+            }
+            if(P.xs[j]<0)
+            {
+                 znakPol2.push_back(-1);
+            }
+            if(P.xs[j]==0)
+            {
+                znakPol2.push_back(0);
+            }
+        }
+
+
+        for (int j = 0; j < P.xs.size(); j++)
+        {
+            int znak1 = znakPol[j];
+            int znak2 = znakPol2[j];
+            int cccc;
+            if(znakPol2[j]!=znakPol[j])
+            {
+                s = QString::number(i);
+                bool exit = true;
+                bool exit2 = true;
+                break;
+            }
+        }
+        if(exit==true)
+        {
+            break;
+        }
+    }
+*/
+    /*//резерв коп
+    bool exit = false;
+    bool exit2 = false;
     for (int i = 1; i < v.size(); i++)
     {
        P = v[i];
        for (int j = 0; j < P.xs.size(); j++)
        {
+           int znakkkk = znakPol[j];
+           int o00;
            if(P.xs[j]>0)
            {
-               if (znakPol[j]!=true)
-                   s = s+"x"+QString::number(j)+"  ";
+               if (0<znakPol[j])
+               {
+                   //s = s + "x" + QString::number(j)+"  ";
+                   s = QString::number(i+1);
+                   bool exit = true;
+                   bool exit2 = true;
+               }
            }
            else
            {
-               if (znakPol[j]!=false)
-                   s = s+"x"+QString::number(j)+"  ";
+               if (0>znakPol[j])
+               {
+                   //s = s+"x"+QString::number(j)+"  ";
+                   s = QString::number(i+1);
+                   bool exit = true;
+                   bool exit2 = true;
+               }
            }
+
+           if(exit2==true)
+           {
+               break;
+           }
+       }
+
+       if(exit==true)
+       {
+           break;
        }
     }
 */
-    ui->label_6->setText("");
-   // ui->label_6->setText(s);
 
+    //ui->label_6->setText("");
+    /*
+    if(ui->label_6->text()=="")
+    ui->label_6->setText(s);*/
+    /*
+    int x = ui->label_6->text().toInt();
+    x++;
+    ui->label_6->setText(QString::number(x));
+*/
     for(int i = 0; i < ch; i++)
     {
         ui->tableWidget_2->item(i, 0)->setBackground(Qt::white);
@@ -741,7 +828,7 @@ void findExtrDialog::updateTable()
 
 
     //перепишем b натуральные в градиент, при этом если незначим, то 0
-    for(int i = 1; i < table->b().count(); i++)
+    for(int i = 1; i < table->x().count()+1; i++)
     {
         double xi = bCoefs[i].is_significant() ? bCoefs[i].natural_value() * (isMax ? 1.0 : -1.0) : 0.0;
         grad.push_back(xi);
@@ -775,7 +862,9 @@ void findExtrDialog::updateTable()
             {
 
                 ui->tableWidget_2->item(i, grad.size()+3)->setText((QString::number((Ypp - Ytt),'f',3)));
-                if ((Ypp - Ytt) > 0)
+                if(i>0)
+                //if ((Ypp - Ytt) > 0)
+                if (this->v[i-1].yp>this->v[i].yp)
                 {
                     //ui->tableWidget_2->item(i, grad.size()+4)->setText("+");
                     ui->tableWidget_2->item(i, grad.size()+4)->setText("к extr");
@@ -793,7 +882,9 @@ void findExtrDialog::updateTable()
             else
             {
                 ui->tableWidget_2->item(i, grad.size()+3)->setText((QString::number((Ytt - Ypp),'f',3)));
-                if ((Ytt - Ypp) > 0)
+                if(i>0)
+                //if ((Ytt - Ypp) > 0)
+                if (this->v[i-1].yp > this->v[i].yp)
                 {
                     //ui->tableWidget_2->item(i, grad.size()+4)->setText("-");
                     ui->tableWidget_2->item(i, grad.size()+4)->setText("к extr");
@@ -846,17 +937,18 @@ void findExtrDialog::updateTable()
             double Ytt = ui->tableWidget_2->item(i, grad.size()+1)->text().toDouble();
             double dev2 = fabs((Ypp / Ytt) - 1) * 100;
 
+            //ui->tableWidget_2->item(i, grad.size()+7)->setText((QString::number(dev2,'f',3)));
             ui->tableWidget_2->item(i, grad.size()+7)->setText((QString::number(dev2,'f',3)));
 
             if (dev2 < this->dev)
             {
                 //ui->tableWidget_2->item(i, grad.size()+7)->setBackground(Qt::green);
-                ui->tableWidget_2->item(i, grad.size()+7)->setBackground(QColor(0, 255, 0, 127));
+               ui->tableWidget_2->item(i, grad.size()+7)->setBackground(QColor(0, 255, 0, 127));
             }
             else
             {
                 //ui->tableWidget_2->item(i, grad.size()+7)->setBackground(Qt::red);
-                 ui->tableWidget_2->item(i, grad.size()+7)->setBackground(QColor(255, 0, 0, 127));
+                ui->tableWidget_2->item(i, grad.size()+7)->setBackground(QColor(255, 0, 0, 127));
             }
         }
     }
@@ -1066,10 +1158,68 @@ bool findExtrDialog::calcYpp()
     else return false;
 }
 
+//кнопка рассчитать
 void findExtrDialog::on_pushButton_clicked()
 {
     h_edit = true;
     restartfindExtr();
+
+    std::vector<int> znakPol;
+    P = v[0];
+    for (int j = 0; j < P.xs.size(); j++)
+    {
+        if(P.xs[j]>0)
+        {
+            znakPol.push_back(1);
+        }
+        if(P.xs[j]<0)
+        {
+             znakPol.push_back(-1);
+        }
+        if(P.xs[j]==0)
+        {
+            znakPol.push_back(0);
+        }
+    }
+    QString s = "";
+    for (int i = 1; i < v.size(); i++)
+    {
+        std::vector<int> znakPol2;
+        P = v[i];
+        for (int j = 0; j < P.xs.size(); j++)
+        {
+            if(P.xs[j]>0)
+            {
+                znakPol2.push_back(1);
+            }
+            if(P.xs[j]<0)
+            {
+                 znakPol2.push_back(-1);
+            }
+            if(P.xs[j]==0)
+            {
+                znakPol2.push_back(0);
+            }
+        }
+
+
+
+
+        for (int j = 0; j < P.xs.size(); j++)
+        {
+            int znak1 = znakPol[j];
+            int znak2 = znakPol2[j];
+            int cccc;
+            if((znakPol2[j]!=znakPol[j])&&(znakPol2[j]!=0))
+            {
+                s = " Номер шага на котором произошла смена знака у x равен " +QString::number(i);
+                goto m;
+            }
+        }
+    }
+
+   m: ui->label_6->setText(s);
+    ui->label_4->setText("Для выбора точки нового эксперимента, необходимо два раза щелкнуть лв.кнопкой мышки по соотвествующей строке");
 }
 
 void findExtrDialog::on_tableWidget_2_cellChanged()
@@ -1109,7 +1259,24 @@ void findExtrDialog::on_pushButton_Experiment_clicked()
         this->exper = true;
         this->ccp = false;
         if(index2==-1)
+        {
             v.erase (v.begin() + this->index1+1, v.end());
+
+
+            double x;
+            if(index1>=2)
+            {
+                x = fabs(((ExperimentPoint)v[index1-1]).yp-((ExperimentPoint)v[index1-2]).yp);
+                x = fabs(fabs(((ExperimentPoint)v[index1]).yp-((ExperimentPoint)v[index1-1]).yp) - x);
+            }
+            else
+            {
+                x = fabs(((ExperimentPoint)v[index1+1-1]).yp-((ExperimentPoint)v[index1+1-2]).yp);
+                x = fabs(fabs(((ExperimentPoint)v[index1+1]).yp-((ExperimentPoint)v[index1+1-1]).yp) - x);
+            }
+
+            this->_FactDivergences = x;
+        }
         else
         {
             ExperimentPoint P1,P2,P3;
@@ -1198,6 +1365,7 @@ void findExtrDialog::on_tableWidget_2_doubleClicked(const QModelIndex &index)
         else
             ui->label_4->setText("Выбран шаг " + QString::number(this->index1+1));
 }
+
 void findExtrDialog::on_pushButton_2_clicked()
 {
     table->setIsMax(ui->radioButton->isChecked());
@@ -1206,15 +1374,15 @@ void findExtrDialog::on_pushButton_2_clicked()
     table->setInterestAllowedDeviation(ui->spinBox_2->value());
     table->setExperimentPoint(v);
 
-    QSettings *setting = new QSettings("params.trolo", QSettings::IniFormat);
-    setting->setValue("ini/grad", QString::fromUtf8("ВОСХОЖДЕНИЕ ПО ГРАДИЕНТУ"));
-    setting->sync();
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_CSV").toString();  
 
-    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)"));
+    QString fileName = QFileDialog::getSaveFileName(this, ("Экспорт данных в CSV"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)"));
 //    this->table->save(fileName.toAscii().data());
     this->saveToCSV(fileName);
-
 }
+
 void findExtrDialog::saveToCSV(const QString &fileName)
 {
     this->table->save(fileName.toAscii().data());

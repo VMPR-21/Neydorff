@@ -64,6 +64,8 @@ public:
 
     bool isFormulaExperiment;
 
+    double _FactDivergences;
+
     void saveToCSV(const QString &fileName);
 
 
