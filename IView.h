@@ -27,6 +27,9 @@ public:
     //заполнение таблицы данными(Х,У...)
     virtual void readData(IExperimentTable *table) = 0;
 
+    // отключает кнопку поиска оптимума, если эксперемент типа мат. моделирования.
+    virtual void setOptimumDesabled() = 0;
+
     virtual ~IView() {}
 };
 

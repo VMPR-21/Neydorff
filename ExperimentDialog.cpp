@@ -1142,3 +1142,7 @@ void ExperimentDialog::setDataSource(int baseFactors, int factorsCount, const st
     src->FactValues = centers;
     _dataSrc = src;
 }
+void ExperimentDialog::setOptimumDesabled()
+{
+
+}

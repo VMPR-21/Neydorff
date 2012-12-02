@@ -19,6 +19,7 @@ private:
     bool _modelHasData;
     bool _isFormulaModel;
     short _ModelType;
+
     IResponcesSource *_dataSrc;
     INumberFormatView *_formatterView;
     INumberFormatter *_formatter;
@@ -46,7 +47,6 @@ public:
     IExperimentTable * getExperimentTable();
     void startProcess(bool max, double _h, int _ch, int _dev);
     void CCP();
-
 
 
     //Реализация IUiController

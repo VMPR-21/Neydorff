@@ -535,7 +535,10 @@ void MainWindow::updateHader2()
     }
 }
 
-
+void MainWindow::setOptimumDesabled()   //parametri
+{
+    ui->findExtrButton_3->setEnabled(false);
+}
 
 void MainWindow::updateYY(const IExperimentTable &table)
 {
@@ -943,8 +946,6 @@ void MainWindow::chModelParams()   //parametri
 
     bool res=ModelType==1? false:true;
     this->ui->findExtrButton_3->setEnabled(res);
-
-
 }
 
 void MainWindow::chNumberFormater() //format chisla

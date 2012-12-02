@@ -50,6 +50,8 @@ public:
     virtual void setNumberStride(int numberStride) const = 0;
     virtual void setInterestAllowedDeviation(double interestAllowedDeviation) const = 0;
     virtual void setExperimentPoint(std::vector<ExperimentPoint> v) const = 0;
+    virtual void setModelType(short ModelType) = 0;
+    virtual short getModelType() = 0;
 
     virtual ~IExperimentTable() {}
 };

@@ -267,7 +267,7 @@ int calculateCOCPTableRowCount(int factor_count)
     return static_cast<int>(pow(2.0, factor_count)) + 2 * factor_count + 1;  // кол-во опытов в эксперименте
 }
 
-IExperimentTable* ExperimentTable::createGradientExperimentTable(int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction, QString cornerMeasure)
+IExperimentTable* ExperimentTable::createGradientExperimentTable(int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction, QString cornerMeasure, short ModelType)
 {
     ExperimentTable *expTable = new ExperimentTable();
 
@@ -286,11 +286,12 @@ IExperimentTable* ExperimentTable::createGradientExperimentTable(int factor_coun
     expTable->numberStride = 7;
     expTable->interestAllowedDeviation = 30;
     // От Коли
+    expTable->_ModelType = ModelType;
 
     return expTable;
 }
 
-IExperimentTable* ExperimentTable::createCentralCompositeExperimentTable(int factor_count, int interaction_level, QString displeyFunction, QString cornerMeasure)
+IExperimentTable* ExperimentTable::createCentralCompositeExperimentTable(int factor_count, int interaction_level, QString displeyFunction, QString cornerMeasure, short ModelType)
 {
     ExperimentTable *expTable = new ExperimentTable();
 
@@ -309,11 +310,12 @@ IExperimentTable* ExperimentTable::createCentralCompositeExperimentTable(int fac
     expTable->numberStride = 7;
     expTable->interestAllowedDeviation = 30;
     // От Коли
+    expTable->_ModelType = ModelType;
 
     return expTable;
 }
 
-IExperimentTable* ExperimentTable::createExperimentTable(TableType tableType, int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction, QString cornerMeasure)
+IExperimentTable* ExperimentTable::createExperimentTable(TableType tableType, int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction, QString cornerMeasure, short ModelType)
 {
     assert(factor_count > 1);
     assert(replica_delimiter > 0);
@@ -321,14 +323,14 @@ IExperimentTable* ExperimentTable::createExperimentTable(TableType tableType, in
     switch(tableType)
     {
     case FullFactorGradient:
-        return createGradientExperimentTable(factor_count, 1, interaction_level, displeyFunction, cornerMeasure);
+        return createGradientExperimentTable(factor_count, 1, interaction_level, displeyFunction, cornerMeasure, ModelType);
         break;
 
     case ReplicaGradient:
-        return createGradientExperimentTable(factor_count, replica_delimiter, interaction_level, displeyFunction, cornerMeasure);
+        return createGradientExperimentTable(factor_count, replica_delimiter, interaction_level, displeyFunction, cornerMeasure, ModelType);
 
     case CentralOrtogonalComposite:
-        return createCentralCompositeExperimentTable(factor_count, interaction_level, displeyFunction, cornerMeasure);
+        return createCentralCompositeExperimentTable(factor_count, interaction_level, displeyFunction, cornerMeasure, ModelType);
 
     default:
         assert(0 != 0); // неподдерживаемый или неизвестный тип таблицы
@@ -451,20 +453,36 @@ void ExperimentTable::setInterestAllowedDeviation(double interestAllowedDeviatio
 
 void ExperimentTable::saveExtrToCSV(QTextStream &srcStream)
 {
-    srcStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
-    srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
-    srcStream << QString::fromUtf8("Величина шага:") << ";" << this->strideParameter << ";\r\n";
-    srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
-    srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << this->interestAllowedDeviation << ";\r\n";
+    if (MATHMODEL == this->_ModelType)
+    {
+        srcStream << QString::fromUtf8("Тип модели:") << ";" << "MATHMODEL" << ";\r\n";
+    }
+    else
+    {
+        srcStream << QString::fromUtf8("Тип модели:") << ";" << "OPTIMUM" << ";\r\n";
+        srcStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
+        srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
+        srcStream << QString::fromUtf8("Величина шага:") << ";" << ExperimentTable::doubleWithComma(this->strideParameter) << ";\r\n";
+        srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
+        srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << ExperimentTable::doubleWithComma(this->interestAllowedDeviation) << ";\r\n";
+    }
 }
 
 void ExperimentTable::saveExtrToCSV(QTextStream &srcStream) const
 {
-    srcStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
-    srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
-    srcStream << QString::fromUtf8("Величина шага:") << ";" << ExperimentTable::doubleWithComma(this->strideParameter) << ";\r\n";
-    srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
-    srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << ExperimentTable::doubleWithComma(this->interestAllowedDeviation) << ";\r\n";
+    if (MATHMODEL == this->_ModelType)
+    {
+        srcStream << QString::fromUtf8("Тип модели:") << ";" << "MATHMODEL" << ";\r\n";
+    }
+    else
+    {
+        srcStream << QString::fromUtf8("Тип модели:") << ";" << "OPTIMUM" << ";\r\n";
+        srcStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
+        srcStream << QString::fromUtf8("По максимуму:") << ";" << this->isMax << ";\r\n";
+        srcStream << QString::fromUtf8("Величина шага:") << ";" << ExperimentTable::doubleWithComma(this->strideParameter) << ";\r\n";
+        srcStream << QString::fromUtf8("Количество шагов:") << ";" << this->numberStride << ";\r\n";
+        srcStream << QString::fromUtf8("Допустимое отклонение:") << ";" << ExperimentTable::doubleWithComma(this->interestAllowedDeviation) << ";\r\n";
+    }
 }
 
 void ExperimentTable::loadExtrFromCSV(QTextStream &srcStream)
@@ -537,4 +555,12 @@ void ExperimentTable::saveExperimentPointToCSV(QTextStream &srcStream) const
             srcStream << ExperimentTable::doubleWithComma(aught.yp) << ";\r\n";
         }
     }
+}
+void ExperimentTable::setModelType(short ModelType)
+{
+    this->_ModelType = ModelType;
+}
+short ExperimentTable::getModelType()
+{
+    return this->_ModelType;
 }

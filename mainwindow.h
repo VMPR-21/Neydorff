@@ -28,7 +28,6 @@ public:
     bool startProgram;
 
 
-
     //сообщает интерфейсу о необходимости обновить на экране значения "Х" из таблицы
     void updateInputs(const IExperimentTable &table);
 
@@ -86,6 +85,7 @@ private slots:
     bool loadFromCSV(); //load from csv
     bool NewExperimenLoadfromCSV(); //
     void chModelParams(); //parametri
+    void setOptimumDesabled(); //parametri
     void chNumberFormater();//format chisla
     void nModel(); //new experement modeling
     void nModelExtr(); //new experiment extr

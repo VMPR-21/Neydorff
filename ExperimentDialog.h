@@ -89,6 +89,8 @@ public:
 
     void findExtr();
 
+    void setOptimumDesabled();
+
 private slots:
     void onBtableContextMenu(const QPoint &pt);
     void on_tableWidget_activated(const QModelIndex &index);

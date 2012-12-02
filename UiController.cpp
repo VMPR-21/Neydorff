@@ -159,20 +159,35 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         QString intLevString = srcStream.readLine().split(QRegExp(";"))[1];
         _interactionLevel = intLevString.toInt();
     }
+    // Model Type
+    bool isMax = true;
+    double strideParameter = 0.50;
+    int numberStride = 7;
+    double interestAllowedDeviation = 30;
+    tmp = srcStream.readLine();
+    tmp = tmp.split(QRegExp(";"))[1];
+    if("MATHMODEL" == tmp)
+    {
+        srcStream.readLine();
+        tmp = srcStream.readLine();
+        tmp = tmp.split(QRegExp(";"))[1];
+        bool isMax = tmp.toInt();
+        tmp = srcStream.readLine();
+        tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
+        double strideParameter = tmp.toDouble();
+        tmp = srcStream.readLine();
+        tmp = tmp.split(QRegExp(";"))[1];
+        int numberStride = tmp.toInt();
+        tmp = srcStream.readLine();
+        tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
+        double interestAllowedDeviation = tmp.toDouble();
+        _ModelType = MATHMODEL;
+    }
+    else
+    {
+        _ModelType = EXTRSEARCH;
+    }
 
-    srcStream.readLine();
-    tmp = srcStream.readLine();
-    tmp = tmp.split(QRegExp(";"))[1];
-    bool isMax = tmp.toInt();
-    tmp = srcStream.readLine();
-    tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
-    double strideParameter = tmp.toDouble();
-    tmp = srcStream.readLine();
-    tmp = tmp.split(QRegExp(";"))[1];
-    int numberStride = tmp.toInt();
-    tmp = srcStream.readLine();
-    tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
-    double interestAllowedDeviation = tmp.toDouble();
 
     quint64 size;
     vector<vector<YInfo> > m_values;
@@ -207,7 +222,7 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         src->DrobRepl=2./3;
         _dataSrc = src;
 
-        _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, factorCount, replicaDelimiter, _interactionLevel, evaluateFunction.at(0), evaluateFunction.at(1));
+        _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, factorCount, replicaDelimiter, _interactionLevel, evaluateFunction.at(0), evaluateFunction.at(1), _ModelType);
 
         _experimentTable->setIsMax(isMax);
         _experimentTable->setStrideParameter(strideParameter);
@@ -297,6 +312,10 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         }
         this->calcY(0.2);
         this->calcB(0.2);
+    }
+    if (MATHMODEL == _ModelType)
+    {
+        _view->setOptimumDesabled();
     }
     return true;
 }
@@ -543,7 +562,7 @@ bool UiController::changeModelParams()
         if(oldInputsCount != _dataSrc->inputsCount() || oldActualInputsCount != _dataSrc->actualInputsCount()) {
             QString displayFunction = _dataSrc->getEvaluateFunction().at(0);
             QString conerMeasure = _dataSrc->getEvaluateFunction().at(1);
-            _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, _dataSrc->inputsCount(), replicaDelim, _interactionLevel, displayFunction, conerMeasure);
+            _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, _dataSrc->inputsCount(), replicaDelim, _interactionLevel, displayFunction, conerMeasure, _ModelType);
 
         } else {
             _experimentTable->b().changeInteractionLevel(_interactionLevel);

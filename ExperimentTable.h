@@ -8,6 +8,9 @@
 #include "TableType.h"
 #include "Experementator.h"
 
+#define MATHMODEL 1
+#define OPTIMASEARCH 2
+
 //Основная таблица эксперимента. Содержит в себе все необходимое.
 class ExperimentTable : public IExperimentTable
 {
@@ -28,7 +31,7 @@ public:
     static QString doubleWithDot(QString d);
 
     //ExperimentTable(int factor_count, int row_count, int replica_delimiter);
-    static IExperimentTable* createExperimentTable(TableType tableType, int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "");
+    static IExperimentTable* createExperimentTable(TableType tableType, int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "", short ModelType = MATHMODEL);
     virtual ~ExperimentTable();
 
     bool load(const char *fileName);
@@ -62,6 +65,9 @@ public:
     void setInterestAllowedDeviation(double interestAllowedDeviation) const;
     void setExperimentPoint(std::vector<ExperimentPoint> v) const;
 
+    void setModelType(short ModelType);
+    short getModelType();
+
 protected:
     //фабричные методы, создающие конкретные экземпляры необходимых объектов.
     //virtual IFactorTable* createFactorTable(int factor_count, int row_count, int replica_delimiter) = 0;
@@ -82,9 +88,11 @@ private:
     mutable std::vector<ExperimentPoint> v;
     // От Коли
 
+    short _ModelType;
+
     ExperimentTable();
-    static IExperimentTable* createCentralCompositeExperimentTable(int factor_count, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "");
-    static IExperimentTable* createGradientExperimentTable(int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "");
+    static IExperimentTable* createCentralCompositeExperimentTable(int factor_count, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "", short ModelType = MATHMODEL);
+    static IExperimentTable* createGradientExperimentTable(int factor_count, int replica_delimiter, int interaction_level, QString displeyFunction = "", QString cornerMeasure = "", short ModelType = MATHMODEL);
 };
 
 #endif // EXPERIMENTTABLE_H
