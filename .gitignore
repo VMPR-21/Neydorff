@@ -1,0 +1,7 @@
+*.ui
+*.txt
+*.pro
+*.user
+*.qrc
+formulas/
+ico/
