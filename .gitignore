@@ -5,3 +5,15 @@
 *.qrc
 formulas/
 ico/
+
+*.slo
+*.lo
+*.o
+
+*.so
+*.dylib
+
+*.lai
+*.la
+*.a
+
