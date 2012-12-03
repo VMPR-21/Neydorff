@@ -1378,7 +1378,7 @@ void findExtrDialog::on_pushButton_2_clicked()
     QString path="";
     path=settings->value("settings/examle_CSV").toString();  
 
-    QString fileName = QFileDialog::getSaveFileName(this, ("Экспорт данных в CSV"), "new_experiment.csv", ("CSV(*.csv);;All Files(*)"));
+    QString fileName = QFileDialog::getSaveFileName(this, ("Экспорт данных в CSV"), path, ("CSV(*.csv);;All Files(*)"));
 //    this->table->save(fileName.toAscii().data());
     this->saveToCSV(fileName);
 }
