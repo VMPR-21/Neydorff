@@ -343,7 +343,7 @@ void RegressionCoefficientTable::saveToCSV(QTextStream &dstStream)
         return;
     }
     dstStream << "\r\n";
-    dstStream << QString::fromUtf8("КОЭФФИЦИЕНТЫ:") << ";" << QString::fromUtf8("B коэф.:") << ";" << QString::fromUtf8("Натуральное:") << "\r\n";
+    dstStream << QString::fromUtf8("КОЭФФИЦИЕНТЫ:") << ";" << QString::fromUtf8("B нормированное:") << ";" << QString::fromUtf8("B Натуральное:") << "\r\n";
     for(size_t i = 0; i < _coefficients->size(); i++)
     {
         QString tmp = "";
