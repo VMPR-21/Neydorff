@@ -168,6 +168,10 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
     tmp = tmp.split(QRegExp(";"))[1];
     if("MATHMODEL" == tmp)
     {
+        _ModelType = MATHMODEL;
+    }
+    else
+    {
         srcStream.readLine();
         tmp = srcStream.readLine();
         tmp = tmp.split(QRegExp(";"))[1];
@@ -181,10 +185,6 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         tmp = srcStream.readLine();
         tmp = ExperimentTable::doubleWithDot(tmp.split(QRegExp(";"))[1]);
         double interestAllowedDeviation = tmp.toDouble();
-        _ModelType = MATHMODEL;
-    }
-    else
-    {
         _ModelType = EXTRSEARCH;
     }
 
