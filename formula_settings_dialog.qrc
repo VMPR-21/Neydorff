@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ico/help.ico</file>
+        <file>ico/icon.png</file>
+        <file>ico/question.jpg</file>
+        <file>formula_settings_dialog_help_info.txt</file>
+    </qresource>
+</RCC>

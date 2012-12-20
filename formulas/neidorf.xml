@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <formula>
+        <text>(pow(1-x1,2)+15*sin(1.1*x1+2))/sqrt(x1*x1+0.5)</text>
+        <corner>degrees</corner>
+    </formula>
+    <factors>
+        <x1>
+            <center>0</center>
+            <divergences>80</divergences>
+        </x1>
+    </factors>
+</settings>

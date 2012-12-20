@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>startWindow</class>
+ <widget class="QDialog" name="startWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>290</width>
+    <height>277</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Программа проведения экспериментов</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QCommandLinkButton" name="clbNewExperimentModeling">
+     <property name="text">
+      <string>Новый эксперимент:
+Моделирование</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCommandLinkButton" name="clbNewExperimentExtrFind">
+     <property name="text">
+      <string>Новый эксперимент:
+Поиск экстремума</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCommandLinkButton" name="clbOpenExperiment">
+     <property name="text">
+      <string>Открыть сохранённый эксперимент</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCommandLinkButton" name="clbImportFromCSV">
+     <property name="text">
+      <string>Импортировать данные из CSV</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

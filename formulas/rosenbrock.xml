@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <formula>
+        <text>100*pow(x2-x1*x1,2)+pow(1-x1,2)</text>
+        <corner>radians</corner>
+    </formula>
+    <factors>
+        <x1>
+            <center>0</center>
+            <divergences>4</divergences>
+        </x1>
+        <x2>
+            <center>0</center>
+            <divergences>4</divergences>
+        </x2>
+    </factors>
+</settings>
