@@ -900,6 +900,14 @@ void MainWindow::saveToCSV()
 
     QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), path /*"new_experiment.csv"*/, ("CSV(*.csv);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
     control->saveModel(fileName);
+
+    /* всплывающее окно подтверждения сохранения данных */
+    int res = QMessageBox::information(this,"Information", "Данные успешно сохранены",QMessageBox::Yes);
+        switch(res)
+        {
+            case QMessageBox::Yes:
+                break;
+        }
 }
 
 //load
