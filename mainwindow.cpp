@@ -902,12 +902,11 @@ void MainWindow::saveToCSV()
     control->saveModel(fileName);
 
     /* всплывающее окно подтверждения сохранения данных */
-    int res = QMessageBox::information(this,"Information", "Данные успешно сохранены",QMessageBox::Yes);
-        switch(res)
-        {
-            case QMessageBox::Yes:
-                break;
-        }
+    QMessageBox msg;
+    msg.setText(QString::fromUtf8("Данные успешно сохранены"));
+    msg.setWindowTitle(" ");
+    msg.setSizeGripEnabled(true);
+    msg.exec();
 }
 
 //load
