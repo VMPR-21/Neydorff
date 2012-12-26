@@ -336,6 +336,7 @@ void MainWindow::showYdata(const IExperimentTable &table)
     //std::vector<std::vector<double> >   bd=table.badYvals();
     for(int i = 0; i < table.rowCount(); ++i)
     {
+        ui->tableWidget->resizeColumnToContents(i);
         int guiRow = getGuiIdx(i);
         //std::vector<double> data=table.yData(i);
         std::vector<YInfo> data = table.y().at(i);
