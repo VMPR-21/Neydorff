@@ -269,7 +269,7 @@
           <item>
            <widget class="QRadioButton" name="rbtnGetYFromFunction">
             <property name="text">
-             <string>Функциональная зависимость</string>
+             <string>Математическое выражение</string>
             </property>
             <property name="checked">
              <bool>false</bool>
