@@ -1365,6 +1365,35 @@ void findExtrDialog::on_tableWidget_2_doubleClicked(const QModelIndex &index)
         else
             ui->label_4->setText("Выбран шаг " + QString::number(this->index1+1));
 }
+void findExtrDialog::on_pushButton_SaveToAS_clicked()
+{
+    table->setIsMax(ui->radioButton->isChecked());
+    table->setStrideParameter(ui->doubleSpinBox->value());
+    table->setNumberStride(ui->spinBox_3->value());
+    table->setInterestAllowedDeviation(ui->spinBox_2->value());
+    table->setExperimentPoint(v);
+
+    QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+    QString path="";
+    path=settings->value("settings/examle_A_S").toString();
+
+    QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), path, ("A_S(*.a_s);;All Files(*)"));
+    this->save(fileName);
+}
+
+void findExtrDialog::save(const QString &fileName)
+{
+    if(this->table->save(fileName.toAscii().data()))
+    {
+        /* всплывающее окно подтверждения сохранения данных */
+        QMessageBox msg;
+        msg.setText(QString::fromUtf8("Данные успешно сохранены"));
+        msg.setWindowTitle(" ");
+        msg.setSizeGripEnabled(true);
+        msg.exec();
+    }
+}
+
 
 void findExtrDialog::on_pushButton_2_clicked()
 {

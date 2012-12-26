@@ -67,7 +67,7 @@ public:
     double _FactDivergences;
 
     void saveToCSV(const QString &fileName);
-
+    void save(const QString &fileName);
 
 private slots:
     void on_tableWidget_2_cellChanged();
@@ -86,6 +86,7 @@ private slots:
 
     void on_tableWidget_2_doubleClicked(const QModelIndex &index);
 
+    void on_pushButton_SaveToAS_clicked();
     void on_pushButton_2_clicked();
 
 private:

@@ -373,6 +373,19 @@
     </rect>
    </property>
    <property name="text">
+    <string>Экспорт в CSV</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_SaveToAS">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>540</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
     <string>Сохранить</string>
    </property>
   </widget>
