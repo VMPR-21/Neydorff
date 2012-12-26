@@ -336,6 +336,35 @@ bool UiController::loadModel(const QString &fileName)
 {
     if (fileName=="") return false;
     //_experimentTable->load(fileName.toAscii().data());
+
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly))
+        return false;
+    QTextStream srcStream(&file);
+
+    /* очень нужная штука для расшифровки кодировки*/
+    QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
+    if (codec!= NULL)
+    {
+        srcStream.setCodec(codec);
+    }
+    else
+    {
+        assert(1);
+    }
+
+    int ModelType;
+    srcStream >> ModelType;
+    if (0 == ModelType)
+    {
+        _ModelType = EXTRSEARCH;
+    }
+    else
+    {
+        _ModelType = MATHMODEL;
+    }
+
     bool r = _experimentTable->load(fileName.toAscii().data());
 
     if(r)

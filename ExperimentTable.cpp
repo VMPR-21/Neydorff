@@ -151,9 +151,9 @@ bool ExperimentTable::load(const char *fileName)
 
         if(v != CURRENT_FILE_FORMAT_VER)
             return false;
+        this->loadExtr(stream);
         this->loadEvaluateFunction(stream);
         _xTable->loadFrom(stream);
-        this->loadExtr(stream);
         _yTable->loadFrom(stream);
         _bTable->loadFrom(stream);
     }
@@ -194,9 +194,9 @@ bool ExperimentTable::save(const char *fileName)
     } else {
         DataStream stream(&file);
         stream << CURRENT_FILE_FORMAT_VER;
+        this->saveExtr(stream);
         this->saveEvaluateFunction(stream);
         _xTable->saveTo(stream);
-        this->saveExtr(stream);
         _yTable->saveTo(stream);
         _bTable->saveTo(stream);
         this->saveExperimentPoint(stream);
@@ -237,9 +237,9 @@ bool ExperimentTable::save(const char *fileName) const
     } else {
         DataStream stream(&file);
         stream << CURRENT_FILE_FORMAT_VER;
+        this->saveExtr(stream);
         this->saveEvaluateFunction(stream);
         _xTable->saveTo(stream);
-        this->saveExtr(stream);
         _yTable->saveTo(stream);
         _bTable->saveTo(stream);
         this->saveExperimentPoint(stream);
