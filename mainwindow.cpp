@@ -336,7 +336,6 @@ void MainWindow::showYdata(const IExperimentTable &table)
     //std::vector<std::vector<double> >   bd=table.badYvals();
     for(int i = 0; i < table.rowCount(); ++i)
     {
-        ui->tableWidget->resizeColumnToContents(i);
         int guiRow = getGuiIdx(i);
         //std::vector<double> data=table.yData(i);
         std::vector<YInfo> data = table.y().at(i);
@@ -1298,4 +1297,10 @@ void MainWindow::on_findExtrButton_3_clicked()
 {
     control->calcB(diB);
     control->findExtr();
+}
+
+void MainWindow::on_tableWidget_itemChanged(QTableWidgetItem *item)
+{
+    ui->tableWidget->resizeColumnsToContents();
+    ui->tableWidget->resizeRowsToContents();
 }

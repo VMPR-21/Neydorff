@@ -122,6 +122,8 @@ private slots:
 
     void on_findExtrButton_3_clicked();
 
+    void on_tableWidget_itemChanged(QTableWidgetItem *item);
+
 private:
     //overrided
     void keyPressEvent(QKeyEvent *e);
