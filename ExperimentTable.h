@@ -48,8 +48,16 @@ public:
     void saveExtrToCSV(QTextStream &srcStream);
     void saveExtrToCSV(QTextStream &srcStream) const;
     void loadExtrFromCSV(QTextStream &srcStream);
+
+    void saveExtr(DataStream &srcStream);
+    void saveExtr(DataStream &srcStream) const;
+    void loadExtr(DataStream &srcStream);
+
     void saveExperimentPointToCSV(QTextStream &srcStream);
     void saveExperimentPointToCSV(QTextStream &srcStream) const;
+
+    void saveExperimentPoint(DataStream &srcStream);
+    void saveExperimentPoint(DataStream &srcStream) const;
 
     void setEvaluateFunction(QString evaluate, QString measure);
     QStringList getEvaluateFunction();

@@ -153,6 +153,7 @@ bool ExperimentTable::load(const char *fileName)
             return false;
         this->loadEvaluateFunction(stream);
         _xTable->loadFrom(stream);
+        this->loadExtr(stream);
         _yTable->loadFrom(stream);
         _bTable->loadFrom(stream);
     }
@@ -195,8 +196,10 @@ bool ExperimentTable::save(const char *fileName)
         stream << CURRENT_FILE_FORMAT_VER;
         this->saveEvaluateFunction(stream);
         _xTable->saveTo(stream);
+        this->saveExtr(stream);
         _yTable->saveTo(stream);
         _bTable->saveTo(stream);
+        this->saveExperimentPoint(stream);
     }
     return true;
 }
@@ -236,8 +239,10 @@ bool ExperimentTable::save(const char *fileName) const
         stream << CURRENT_FILE_FORMAT_VER;
         this->saveEvaluateFunction(stream);
         _xTable->saveTo(stream);
+        this->saveExtr(stream);
         _yTable->saveTo(stream);
         _bTable->saveTo(stream);
+        this->saveExperimentPoint(stream);
     }
     return true;
 }
@@ -451,6 +456,51 @@ void ExperimentTable::setNumberStride(int numberStride) const
 void ExperimentTable::setInterestAllowedDeviation(double interestAllowedDeviation) const
 { this->interestAllowedDeviation = interestAllowedDeviation;}
 
+void ExperimentTable::saveExtr(DataStream &srcStream)
+{
+    if (MATHMODEL == this->_ModelType)
+    {
+        srcStream << 1; // Если мат. модель
+    }
+    else
+    {
+        srcStream << 0; // Если поиск оптимума
+        srcStream << this->isMax;
+        srcStream << this->strideParameter;
+        srcStream << this->numberStride;
+        srcStream << this->interestAllowedDeviation;
+    }
+}
+
+void ExperimentTable::saveExtr(DataStream &srcStream) const
+{
+    if (MATHMODEL == this->_ModelType)
+    {
+        srcStream << 1; // Если мат. модель
+    }
+    else
+    {
+        srcStream << 0; // Если поиск оптимума
+        srcStream << this->isMax;
+        srcStream << this->strideParameter;
+        srcStream << this->numberStride;
+        srcStream << this->interestAllowedDeviation;
+    }
+}
+
+void ExperimentTable::loadExtr(DataStream &srcStream)
+{
+    int ModelType;
+    srcStream >> ModelType;
+    if (0 == ModelType)
+    {
+        srcStream >> this->isMax;
+        srcStream >> this->strideParameter;
+        srcStream >> this->numberStride;
+        srcStream >> this->interestAllowedDeviation;
+    }
+}
+
 void ExperimentTable::saveExtrToCSV(QTextStream &srcStream)
 {
     if (MATHMODEL == this->_ModelType)
@@ -553,6 +603,40 @@ void ExperimentTable::saveExperimentPointToCSV(QTextStream &srcStream) const
             }
             srcStream << ExperimentTable::doubleWithComma(aught.yt) << ';';
             srcStream << ExperimentTable::doubleWithComma(aught.yp) << ";\r\n";
+        }
+    }
+}
+
+void ExperimentTable::saveExperimentPoint(DataStream &srcStream)
+{
+    if (0 < this->v.size())
+    {
+        ExperimentPoint aught = v[0];
+        for (int i = 0; i < this->v.size(); i++)
+        {
+            aught = v.at(i);
+            for (int j = 0; j < aught.xs.size(); j++) {
+                srcStream << aught.xs[j];
+            }
+            srcStream << aught.yt;
+            srcStream << aught.yp;
+        }
+    }
+}
+
+void ExperimentTable::saveExperimentPoint(DataStream &srcStream) const
+{
+    if (0 < this->v.size())
+    {
+        ExperimentPoint aught = v[0];
+        for (int i = 0; i < this->v.size(); i++)
+        {
+            aught = v.at(i);
+            for (int j = 0; j < aught.xs.size(); j++) {
+                srcStream << aught.xs[j];
+            }
+            srcStream << aught.yt;
+            srcStream << aught.yp;
         }
     }
 }
