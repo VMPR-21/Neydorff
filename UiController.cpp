@@ -88,6 +88,18 @@ bool UiController::NewExperimenLoadfromCSV(const QString &fileName)
         return false;
     QTextStream srcStream(&file);
 
+    /* очень нужная штука для расшифровки кодировки*/
+    QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
+    if (codec!= NULL)
+    {
+        srcStream.setCodec(codec);
+    }
+    else
+    {
+        assert(1);
+    }
+    /* очень нужная штука для расшифровки кодировки*/
+
     QStringList evaluateFunction;
     int replicaDelimiter;
     int factorCount;

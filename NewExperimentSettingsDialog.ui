@@ -442,6 +442,13 @@
         </spacer>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButtonExportToCSVParams">
+         <property name="text">
+          <string>Экспорт в CSV</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
           <string>Отмена</string>

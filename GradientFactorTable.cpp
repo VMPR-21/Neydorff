@@ -361,7 +361,7 @@ void GradientFactorTable::saveToCSV(QTextStream &dstStream)
         dstStream << ';' << ExperimentTable::doubleWithComma(_center->at(i)) << ';';
         dstStream << "\r\n";
     }
-    dstStream << QString::fromUtf8("Диапазон варьирования:") << ';' << "\r\n";
+    dstStream << QString::fromUtf8("Интервал варьирования:") << ';' << "\r\n";
     for(size_t i = 0; i < _center->size(); i++)
     {
         dstStream << ';' << ExperimentTable::doubleWithComma(_delta->at(i)) << ';';

@@ -1,5 +1,20 @@
 #include "NewExperimentSettingsDialog.h"
 
+#include "ExperimentTable.h"
+#include "DataStream.h"
+#include <QFile>
+#include <QTextStream>
+#include <assert.h>
+#include "bCoeff.h"
+#include "GradientFactorTable.h"
+#include "GradientRegressionCoefficientTable.h"
+#include "CentralOrtogonalFactorTable.h"
+#include "CentralOrtogonalRegressionCoefficientTable.h"
+#include "ResponseTable.h"
+#include "math.h"
+#include <QTextCodec>
+
+
 #ifdef _MSC_VER
 static double log2(double n) //log2() is not supported by MSVC
 {
@@ -852,7 +867,6 @@ int NewExperimentSettingsDialog::GetModelType()
     return 1;
 }
 
-
 void NewExperimentSettingsDialog::FormulaCheck()
 {
     if (ui->tFormulaInput->toPlainText()=="")
@@ -1128,5 +1142,101 @@ int NewExperimentSettingsDialog::getParal()
     return ui->spinBox_paral->value();
 }
 
+void NewExperimentSettingsDialog::on_pushButtonExportToCSVParams_clicked()
+{
+    if (ui->FactNum_spinBox->value()<2)
+    {
+        QMessageBox::about(this,"Ошибка",QString("<p><h3>Недостаточно факторов</h3></p>"));
+        return;
+    }
+    else
+    {
+        QSettings *settings = new QSettings("settings.conf",QSettings::IniFormat);
+        QString path="";
+        path=settings->value("settings/examle_CSV").toString();
+
+        QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), path /*"new_experiment.csv"*/, ("CSV(*.csv);;All Files(*)"));
+        this->saveToCSV(fileName);
 
 
+        QMessageBox msg;
+        msg.setText(QString::fromUtf8("Данные успешно сохранены"));
+        msg.setWindowTitle(" ");
+        msg.setSizeGripEnabled(true);
+        msg.exec();
+    }
+}
+bool NewExperimentSettingsDialog::saveToCSV(const QString &fileName)
+{
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::WriteOnly))
+        return false;
+
+    QTextStream dstStream(&file);
+    QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
+    if (codec!= NULL)
+    {
+        dstStream.setCodec(codec);
+    }
+    else
+    {
+        assert(1);
+    }
+
+    if (ui->rbtnGetYFromFunction->isChecked())
+    {
+        dstStream << QString::fromUtf8("Функция:") << ";" << ui->tFormulaInput->toPlainText() << "\r\n";
+        if (ui->rbRadianCorner)
+        {
+            dstStream << QString::fromUtf8("Мера угла:") << ";" << "radian" << "\r\n";
+        }
+        else
+        {
+            dstStream << QString::fromUtf8("Мера угла:") << ";" << "degrees" << "\r\n";
+        }
+    }
+
+    dstStream << QString::fromUtf8("ТАБЛИЦА ФАКТОРОВ;\r\n");
+    dstStream << QString::fromUtf8("Число факторов:") << ";" << ui->FactNum_spinBox->text() << "\r\n";
+    dstStream << QString::fromUtf8("Число опытов ПФЭ:") << ';' << ui->PFEnum_labelPFE->text() << ';' << "\r\n";
+    dstStream << QString::fromUtf8("Дробность реплики:") << ";" << ui->label_drob->text() << ";\r\n";
+    dstStream << QString::fromUtf8("Число базовых факторов:") << ";" << ui->label_FactBase->text() << ";\r\n";
+    dstStream << QString::fromUtf8("Центры плана:") << ';' << "\r\n";
+    for(size_t i = 0; i < ui->tableWidget_Znach->rowCount(); i++)
+    {
+        dstStream << ';' << ExperimentTable::doubleWithComma( ui->tableWidget_Znach->item(i, 2)->text().toDouble()) << ';';
+        dstStream << "\r\n";
+    }
+    dstStream << QString::fromUtf8("Интервал варьирования:") << ';' << "\r\n";
+    for(size_t i = 0; i < ui->tableWidget_Znach->rowCount(); i++)
+    {
+        dstStream << ';' << ExperimentTable::doubleWithComma(ui->tableWidget_Znach->item(i, 6)->text().toDouble()) << ';';
+        dstStream << "\r\n";
+    }
+    dstStream << QString::fromUtf8("Размер описаний:") << ';';
+    dstStream << ui->tableWidget_Znach->rowCount() << ';' << "\r\n";
+
+    dstStream << QString::fromUtf8("Описания:") << ';' << "\r\n";
+    for(size_t i = 0; i < ui->tableWidget_Znach->rowCount(); i++)
+    {
+        dstStream << ';' << ui->tableWidget_Znach->item(i, 1)->text() << ';';
+        dstStream << "\r\n";
+    }
+    dstStream << QString::fromUtf8("Уровень взаимодействия:") << ";" << ui->spinBox_interactionLevel->text() << ";\r\n";
+    if (MATHMODEL == _modelType)
+    {
+        dstStream << QString::fromUtf8("Тип модели:") << ";" << "MATHMODEL" << ";\r\n";
+    }
+    else
+    {
+        dstStream << QString::fromUtf8("Тип модели:") << ";" << "OPTIMUM" << ";\r\n";
+        dstStream << QString::fromUtf8("Поиск точек перегиба") << ";\r\n";
+        dstStream << QString::fromUtf8("По максимуму:") << ";" << "1" << ";\r\n";
+        dstStream << QString::fromUtf8("Величина шага:") << ";" << "0,5" << ";\r\n";
+        dstStream << QString::fromUtf8("Количество шагов:") << ";" << "7" << ";\r\n";
+        dstStream << QString::fromUtf8("Допустимое отклонение:") << ";" << "30" << ";\r\n";
+    }
+    dstStream << QString::fromUtf8("Количество параллельных опытов:") << ";" << ui->spinBox_paral->text() << "\r\n";
+
+}

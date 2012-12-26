@@ -58,6 +58,7 @@ public:
 //   / int closeEvent(QCloseEvent *evnt);
     //void closeEvent(QCloseEvent *);
 
+    bool saveToCSV(const QString &fileName);
 
 
 private slots:
@@ -65,6 +66,8 @@ private slots:
     void on_DrobRepl_horizontalSlider_valueChanged(int value);
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
+    void on_pushButtonExportToCSVParams_clicked();
+
 
     void on_tableWidget_Znach_cellChanged(int row, int column);
 

@@ -1386,4 +1386,11 @@ void findExtrDialog::on_pushButton_2_clicked()
 void findExtrDialog::saveToCSV(const QString &fileName)
 {
     this->table->save(fileName.toAscii().data());
+
+    /* всплывающее окно подтверждения сохранения данных */
+    QMessageBox msg;
+    msg.setText(QString::fromUtf8("Данные успешно сохранены"));
+    msg.setWindowTitle(" ");
+    msg.setSizeGripEnabled(true);
+    msg.exec();
 }
