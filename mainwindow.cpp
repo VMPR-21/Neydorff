@@ -887,7 +887,14 @@ void MainWindow::saveToFile()
     path=settings->value("settings/examle_A_S").toString();
 
     QString fileName = QFileDialog::getSaveFileName(this, ("Сохранить"), path, ("Table (*.a_s);;All Files(*)")); //QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation)
-    control->saveModel(fileName);
+    if (control->saveModel(fileName))
+    {
+        QMessageBox msg;
+        msg.setText(QString::fromUtf8("Данные успешно сохранены"));
+        msg.setWindowTitle(" ");
+        msg.setSizeGripEnabled(true);
+        msg.exec();
+    }
 }
 
 // save to CSV
@@ -904,15 +911,6 @@ void MainWindow::saveToCSV()
         /* всплывающее окно подтверждения сохранения данных */
         QMessageBox msg;
         msg.setText(QString::fromUtf8("Данные успешно сохранены"));
-        msg.setWindowTitle(" ");
-        msg.setSizeGripEnabled(true);
-        msg.exec();
-    }
-    else
-    {
-        /* всплывающее окно подтверждения сохранения данных */
-        QMessageBox msg;
-        msg.setText(QString::fromUtf8("Ошибка при сохранении"));
         msg.setWindowTitle(" ");
         msg.setSizeGripEnabled(true);
         msg.exec();

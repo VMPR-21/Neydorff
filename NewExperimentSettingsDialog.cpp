@@ -1164,15 +1164,6 @@ void NewExperimentSettingsDialog::on_pushButtonExportToCSVParams_clicked()
             msg.setSizeGripEnabled(true);
             msg.exec();
         }
-        else
-        {
-            /* всплывающее окно подтверждения сохранения данных */
-            QMessageBox msg;
-            msg.setText(QString::fromUtf8("Ошибка при сохранении"));
-            msg.setWindowTitle(" ");
-            msg.setSizeGripEnabled(true);
-            msg.exec();
-        }
     }
 }
 bool NewExperimentSettingsDialog::saveToCSV(const QString &fileName)
