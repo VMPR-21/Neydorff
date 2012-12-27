@@ -364,6 +364,7 @@ bool UiController::loadModel(const QString &fileName)
     {
         _ModelType = MATHMODEL;
     }
+    _experimentTable = ExperimentTable::createExperimentTable(ReplicaGradient, 2, 1, 1, "", "grad");
 
     bool r = _experimentTable->load(fileName.toAscii().data());
 
