@@ -137,7 +137,7 @@ FORMS += \
     savedirectorypathdialog.ui
 
 #QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS += -Wextra -pedantic #-std=c++0x
+*-g++: QMAKE_CXXFLAGS += #-Wextra -pedantic -std=c++0x
 #QMAKE_CXXFLAGS += -O3 -march=native -mfpmath=sse -ffast-math
 
 RESOURCES += \

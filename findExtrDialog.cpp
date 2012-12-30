@@ -1319,14 +1319,14 @@ void findExtrDialog::on_tableWidget_2_doubleClicked(const QModelIndex &index)
         this->index1 = index.row();
     else
     {
-        if(fabs(index.row()-this->index1)<2)
+        if(abs(index.row()-this->index1)<2)
         {
             this->index2 = this->index1;
             this->index1 = index.row();
         }
         else
         {
-            if(fabs(index.row()-this->index2)<2)
+            if(abs(index.row()-this->index2)<2)
             {
                 this->index1 = index.row();
             }
